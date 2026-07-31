@@ -19,6 +19,7 @@ How the code relates to arXiv:2603.13703, and where it deviates.
 | Alg. 3, Steps 4–5 | `computeFlip` (`flip.m2`), `bigradedReesProjection` (`rees.m2`) |
 | Lemma 7.2, normality | `isNormalSource` |
 | Lemma 7.2, exceptional locus | `isSmallProjection` |
+| — (outside the paper) | affine base, `BaseIsProjective => false` |
 
 ## Deviations and choices
 
@@ -61,6 +62,59 @@ least degree; a different one can be supplied with the option `Section`.
 the same up to `MaxSteps` (default 4, i.e. `m` up to 24), and the option
 `Multipliers` allows an explicit list instead — useful because symbolic powers
 grow quickly.
+
+## Affine base
+
+`BaseIsProjective => false` runs the same algorithm over `X = Spec R` for an
+arbitrary affine ring `R`. This is outside the scope of the paper; it exists
+because a projective threefold containing a given non-Q-Gorenstein singularity
+needs many more variables than the singularity itself, which makes the Rees and
+symbolic power computations much heavier.
+
+`Z` still sits in `P^(r-1) x X`, cut out of `k[u,x]` by an ideal homogeneous in
+`u` alone, so the only changes are:
+
+* the `x` variables carry no grading, hence `u_i - f_i t` is homogeneous in `u`
+  whatever the degrees of the `f_i`, and `singleDegreeIdeal` is not used;
+* the irrelevant ideal is `(u_1, ..., u_r)` rather than `(u_i x_j)`;
+* one cone direction fewer is subtracted from Krull dimensions
+  (`geometricDimension`, `bigradedDim`, `imageDimension`).
+
+`isSmallProjection` and `isNormalSource` are unchanged. `b2mToGraphMorphism` has
+no affine analogue — the Segre construction of Lemma 2.3 needs both gradings —
+and raises an error.
+
+## The toric test case
+
+`examples/toric-flip.m2` runs the algorithm on the first genuine flip in the
+repository. Let `sigma` be the cone on
+
+    v1 = (1,0,0), v2 = (0,1,0), v3 = (0,0,1), v4 = (1,1,-2)
+
+in `N = Z^3`, with circuit relation `v1 + v2 = 2 v3 + v4`. No `m` satisfies
+`m.v_i = 1` for all four rays, so `X = Spec k[sigma^v cap M]` is not
+Q-Gorenstein. The two triangulations of the circuit are
+
+    Y : <v1,v2,v3>, <v1,v2,v4>   wall <v1,v2>,  K.C = -(2+1-1-1) = -1
+    Z : <v1,v3,v4>, <v2,v3,v4>   wall <v3,v4>,  K.C = -(1+1-2-1) = +1
+
+so `Y --> X` is the flipping contraction and `Z --> X` is its flip. What the
+computation confirms:
+
+* `canonicalDivisorData` returns `-D_1 - D_3`, which differs from the
+  torus-invariant `-sum D_i` by the principal divisor `div(y_1) = D_2 + D_4`.
+* `s = 1`, `E = D_1 + D_3`, and `I = O_X(-E)` has exactly two generators, so
+  `Z` lands in `P^1 x X` — one homogeneous coordinate per maximal cone of `Z`.
+* **`m = 1` already works**: `Z^1` is normal and the projection is small.
+* The fibre over the torus fixed point is one-dimensional, so the exceptional
+  locus is a curve.
+* Both charts `D_+(u_i)` are smooth of dimension three, and the fan recovered
+  from the generators of `I` is exactly `<v1,v3,v4>, <v2,v3,v4>` — the
+  triangulation on which `K` is `pi`-ample. The algorithm returns the flip, not
+  the contraction it came from.
+
+The last two points are the real check, and they are what the regression test at
+the bottom of `FlipComputation.m2` asserts.
 
 ## Known limitations
 

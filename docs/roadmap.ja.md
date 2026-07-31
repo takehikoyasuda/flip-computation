@@ -6,22 +6,28 @@
 
 ## 1. 現状
 
-コミット `003525a` までで以下が動いている。
+以下が動いている（テスト7件、`M2 --script tests/run-tests.m2` が約1秒で通過）。
 
 * `FlipComputation.m2` + `FlipComputation/{basics,divisors,rees,segre,flip,doc}.m2`
 * Algorithm 3 の Step 1–5 を実装（`computeFlip`）
 * Lemma 2.6 の B2M projection → graph morphism 変換（`b2mToGraphMorphism`）
-* テスト5件（`M2 --script tests/run-tests.m2`、約1秒で通過）
-  * 3次元 ODP の small resolution が正規かつ small と判定される
-  * P^3 の点のブローアップが small でないと判定される
+* 局所（アフィン）版サポート（`BaseIsProjective => false`）
+* テスト内容
+  * 3次元 ODP の small resolution が正規かつ small と判定される（射影版・アフィン版）
+  * P^3 の点のブローアップ／A^3 の原点のブローアップが small でないと判定される
   * K_{P^3} = -4H
   * Segre 積の Hilbert 基底の個数
   * graph morphism 変換後の次元
-* `examples/ordinary-double-point.m2`、`docs/implementation-notes.md`
+  * **トーリックなフリップの例を端から端まで検証**（下記）
+* `examples/ordinary-double-point.m2`、`examples/toric-flip.m2`、
+  `docs/implementation-notes.md`
 
-**未検証**: 本物のフリップの例で `computeFlip` 全体を通したことがない。ODP は
-K_X が Cartier なのでフロップであり、Step 1–3（K_X から I を作る部分）と
-Step 4–5 のループを通した実例がまだない。
+**本物のフリップでの検証は完了した。** 非 Q-Gorenstein トーリック3-fold
+`sigma = cone((1,0,0),(0,1,0),(0,0,1),(1,1,-2))` に対し、`computeFlip` が m = 1 で
+フリップを返し、その扇が期待される三角形分割 `<v1,v3,v4>, <v2,v3,v4>` に一致すること、
+例外集合が曲線であること、K_Z が π-ample であること（フリップであってアンチフリップ
+でないこと）まで確認済み。詳細は `docs/implementation-notes.md` の
+「The toric test case」節。
 
 ## 2. 別の PC でのセットアップ
 
@@ -31,7 +37,7 @@ cd flip-computation
 M2 --script tests/run-tests.m2      # "all tests passed" が出れば OK
 ```
 
-必要なのは Macaulay2 本体のみ（1.24.05 で確認）。使用パッケージ
+必要なのは Macaulay2 本体のみ（1.24.05 と 1.24.11 で確認）。使用パッケージ
 `Divisor`, `SymbolicPowers`, `MinimalPrimes`, `IntegralClosure`, `Elimination`,
 `Polyhedra` はすべて M2 同梱。
 
@@ -46,65 +52,60 @@ for f in libicudata.74.dylib libicui18n.74.dylib libicuuc.74.dylib; do
 done
 ```
 
-## 3. 次の作業 A: 局所（アフィン）版サポートとトーリック例での検証
+## 3. 作業 A: 局所（アフィン）版サポートとトーリック例での検証
 
-目的は Algorithm 3 の中核（Rees 代数・正規性・例外集合の判定）を、本物のフリップ
-特異点で確かめること。射影的な非 Q-Gorenstein 3-fold を同次座標環として書き下すと
-変数と次数が増えて計算が重いので、まず局所版で検証する。論文のスコープ外の補助機能
-という位置づけ。
+### A-1, A-2 は完了
 
-### A-1. 実装（小さい変更で済む）
+実装は roadmap の当初案どおり（`baseIsProjective` キー、次元補正の切り替え、
+`BaseIsProjective` オプション、`isSmallProjection` は共通のまま）。実際に書いてみて
+分かった点だけ記す。
 
-* `B2MProjection` にキー `baseIsProjective`（Boolean、既定 `true`）を追加する。
-* 次元補正を切り替える。
-  * `geometricDimension`: 射影 `dim totalRing - 2` / アフィン `dim totalRing - 1`
-  * `bigradedDim`: 同様に `-2` / `-1`
-  * `imageDimension`: 射影 `dim(R/q0) - 1` / アフィン `dim(R/q0)`
-  * `irrelevantIdeal`: アフィンの場合は `ideal(u_1,...,u_r)`（x 側の錐がない）
-* `bigradedReesProjection` にオプション `BaseIsProjective => true` を追加。アフィン
-  の場合は `deg u_i = 1`, `deg x_j = 0` の単一次数付けでよく、`singleDegreeIdeal`
-  による次数揃えも不要（生成元の次数を揃える必要がそもそもない）。消去による
-  Rees イデアル計算は `deg t = -1`（または重み付けなし）で行う。
-* `isSmallProjection` のロジックは共通のまま使える。
+* アフィンの場合、`k[u,x]` に `deg x_j = 0` を入れると heft ベクトルが取れず
+  `basis` などが壊れる。u 次数付けは**明示せず**、標準次数の環で計算している。
+  実際に使う操作（gb, `eliminate`, `minimalPrimes`, `dim`, `isNormal`）はいずれも
+  次数付けを必要としないので問題ない。
+* `b2mToGraphMorphism` はアフィンでは意味を持たない（Lemma 2.3 の Segre 構成が
+  両方の次数付けを要る）ので明示的にエラーにした。
+* `canonicalDivisorData` / `antiCanonicalSection` / `flipDivisorData` にも
+  `BaseIsProjective` を通した（`Divisor` の `IsGraded` に渡すだけ）。
+* パッケージ本体の `load "FlipComputation/basics.m2"` が相対パスだったため、
+  `check` がサブプロセスでテストを走らせるとファイルが見つからず落ちていた。
+  `currentFileDirectory` 基準に修正済み。
+* TEST ブロックからは `PackageImports` の `Divisor` のシンボル（`canonicalDivisor`,
+  `divisor`）が見えない（`Polyhedra` のものは見える）。テストではパッケージ自身の
+  `canonicalDivisorData` を使い、線形同値の確認は `examples/toric-flip.m2` 側で
+  `needsPackage "Divisor"` して行っている。
 
-### A-2. 検証に使うトーリック例
+検証結果（`examples/toric-flip.m2`、実行約 0.7 秒）:
 
-3次元の非 Q-Gorenstein なフリップ特異点として
+* `K_X` は `-D_1 - D_3` として返る。トーリックな `-Σ D_i` とは主因子
+  `div(y_1) = D_2 + D_4` の分だけ違い、線形同値であることを確認した。
+  当初「`-Σ D_i` になるはず」と書いたが、`Divisor` パッケージが返すのは
+  標準加群から作った代表元なので一致する必要はない。
+* `s = 1`, `E = D_1 + D_3`, `I = O_X(-E)` の生成元はちょうど2個。したがって
+  Z ⊂ P^1 × X で、これは Z の極大錐の個数と一致する。
+* **m = 1 で通る**（正規かつ small）。
+* トーラス固定点上のファイバーは1次元 → 例外集合は曲線。
+* 2つのチャートはいずれも3次元で smooth。I の生成元から復元した扇は
+  `<v1,v3,v4>, <v2,v3,v4>` に一致。壁 `<v3,v4>` での wall relation から
+  `K·C = +1 > 0`、すなわち K_Z は π-ample。反対側 Y では `K·C = -1 < 0`。
+  つまり `computeFlip` はフリップを返しており、入力側の縮約ではない。
 
-```
-sigma = cone( v1=(1,0,0), v2=(0,1,0), v3=(0,0,1), v4=(1,1,-2) )
-```
+### A-3. 次: 射影版
 
-を使う。circuit 関係は `v1 + v2 = 2 v3 + v4`（正側の重み和 2、負側 3）で、
-4本の生成線が同一アフィン超平面に乗らない（`m·v_i = 1` を満たす `m` が存在しない）
-ので X = Spec k[σ^∨ ∩ M] は Q-Gorenstein ではない。σ の2通りの三角形分割が
-フリップの両側 Y, Z を与える。
+同じ特異点を含む射影的 3-fold を作って論文どおりの設定で確かめる。A-2 の X_aff を
+`D_+(w)` として含む射影錐 `Proj(A[w])`（A に正の次数付けを入れる）を使えば3次元
+射影多様体になり、変数の増加も1個で済む。ただし頂点以外にも特異点が出るので、
+Algorithm 3 が返すものが「その特異点でのフリップ」になっているかは局所的に確認する
+必要がある。射影版では `singleDegreeIdeal` による次数揃えが効いてくるので、そこが
+本当に正しいブローアップを与えているかの実地確認も兼ねる。
 
-手順:
+### A-4. トーリック例をもう少し増やす
 
-1. σ^∨ ∩ M の Hilbert 基底を計算する（`Polyhedra` の `hilbertBasis` を
-   `dualCone` に適用。`segre.m2` の `segreHilbertBasis` と同じ使い方）。
-2. 生成元を単項式写像 `k[y_1..y_s] → k[t1^±,t2^±,t3^±]` の像として、その核
-   （トーリックイデアル）を `ker` で計算し、R = k[y]/I を得る。
-3. `canonicalDivisor(R)`（`IsGraded => false`）で K_X を計算し、Step 2, 3 を通す。
-   トーリックなので K_X = -Σ D_i（D_i は torus 不変素因子）になるはずで、
-   `canonicalDivisorData` の出力と突き合わせて確認する。
-4. `computeFlip(R, BaseIsProjective => false)` を走らせ、m = 1 で small かつ正規
-   になるかを見る。
-5. 期待される結果の突き合わせ:
-   * 例外集合が曲線（余次元2）であること
-   * Z の扇が σ の「もう一方の三角形分割」に一致すること
-     （`NormalToricVarieties` で作った期待値と、Z の定義イデアルの比較）
-   * K_Z が π-ample であること（フリップであってアンチフリップでないこと）の確認方法
-     を決める。トーリックでは discrepancy の計算で判定できる。
-
-### A-3. その後の射影版
-
-局所版が通ったら、同じ特異点を含む射影的 3-fold を作って論文どおりの設定で
-確かめる。A-2 の X_aff を `D_+(w)` として含む射影錐 `Proj(A[w])`（A に正の次数
-付けを入れる）を使えば3次元射影多様体になり、変数の増加も1個で済む。ただし
-頂点以外にも特異点が出るので、Algorithm 3 が返すものが「その特異点でのフリップ」
-になっているかは局所的に確認する必要がある。
+今の例は m = 1 で通ってしまい、Step 4 のループ（m を増やす部分）が一度も回っていない。
+`m > 1` を要求する例が欲しい。候補は circuit の重みを上げた
+`cone((1,0,0),(0,1,0),(0,0,1),(1,1,-3))` など（Z 側の錐が特異になり、K_Z の指数が
+1 でなくなる）。B-2（m の刻み）の検討にも必要。
 
 ## 4. 次の作業 B: Algorithm 3 の精緻化
 
@@ -139,12 +140,22 @@ sigma = cone( v1=(1,0,0), v2=(0,1,0), v3=(0,0,1), v4=(1,1,-2) )
   Algorithm 4（MMP 全体、7章）。
 * public 化の準備: ライセンス選定（未定、README に明記済み）、GitHub Actions で
   Macaulay2 のテストを回す CI、`installPackage` が通るドキュメント整備。
+  * **既知の不具合（今回の変更以前から存在）**: `installPackage` が
+    `can't convert symbol 'Section' to external string because it is shadowed by
+    'Section'` で失敗する。export しているオプション名 `Section` が `SimpleDoc`
+    側の `Section` と衝突している。`AntiCanonicalSection` などに改名すれば直る
+    見込み。`check`（= `tests/run-tests.m2`）は影響を受けないので通る。
 
 ## 6. 論文に照らして確認したい点
 
 * **Step 3 の符号**。論文は `I := prod p_i^{n_i - m_i}` と書いているが、
   E = div(s) - K_X が有効因子なので O_X(K_X - div(s)) = O_X(-E) に対応する
   イデアルの指数は `m_i - n_i` になる。実装は後者。誤植かどうかの確認。
+  トーリック例で実装の符号が正しい答え（K_Z が π-ample な側）を返すことは確認済み
+  なので、論文側の誤植と見てよさそう。
+* **Step 2 の s の存在**。トーリック例では K_X の係数がすべて負だったので
+  `s = 1` になった。論文の記述では s は `prod p_i^max(0,n_i)` の元だが、
+  この積が単位イデアルになる場合の扱いを明示しておきたい。
 * **Step 5 の `V(h) ⊂ X × P^{r-1}`**。u_i の次数を (0,1) にすると、I^(m) の生成元の
   次数が揃っていないと Rees の関係式が双斉次にならない。実装では I^(m) をその
   D 次成分で生成し直して回避している（層としては同じなのでブローアップも同じ）。

@@ -35,6 +35,9 @@ segreProductRing (Ring, List, List) := (kk, ds, cs) -> (
 -- which is the ideal xi^(-1)(p) of the proof of Lemma 2.6.
 b2mToGraphMorphism = method(Options => {Verbose => false})
 b2mToGraphMorphism B2MProjection := o -> P -> (
+    if not isProjectiveBase P then error(
+        "b2mToGraphMorphism: the base must be projective; "
+        | "a graph morphism of monograded varieties has no affine analogue here");
     A := P#ambientRing;
     U := P#totalRing;
     R := P#baseRing;

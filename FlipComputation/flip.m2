@@ -13,10 +13,12 @@ computeFlip = method(Options => {
         Multipliers => null,
         MaxSteps => 4,
         ReturnGraph => false,
+        BaseIsProjective => true,
         Verbose => true
         })
 computeFlip Ring := o -> R -> (
-    (s, Edata) := flipDivisorData(R, Section => o.Section);
+    (s, Edata) := flipDivisorData(R,
+        Section => o.Section, BaseIsProjective => o.BaseIsProjective);
     if o.Verbose then (
         << "-- s = " << s << endl;
         << "-- E = div(s) - K_X has " << #Edata << " component(s) with multiplicities "
@@ -28,7 +30,7 @@ computeFlip Ring := o -> R -> (
     for m in ms do (
         if o.Verbose then << "-- m = " << m << ":" << endl;
         Im := divisorialIdeal(Edata, m);
-        P := bigradedReesProjection Im;
+        P := bigradedReesProjection(Im, BaseIsProjective => o.BaseIsProjective);
         if o.Verbose then << "--   Z^m sits in P^" << #(P#fiberVariables) - 1
             << " x X, dim Z^m = " << geometricDimension P << endl;
         if not isNormalSource P then (

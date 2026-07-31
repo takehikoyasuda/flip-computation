@@ -17,7 +17,7 @@ Early development. The API is unstable.
 
 ## Requirements
 
-* Macaulay2 (tested with 1.24.05)
+* Macaulay2 (tested with 1.24.05 and 1.24.11)
 * Bundled packages: `Divisor`, `SymbolicPowers`, `ReesAlgebra`, `Polyhedra`,
   `IntegralClosure`, `MinimalPrimes`, `Elimination`
 
@@ -31,7 +31,14 @@ or, from the repository root,
 
 ```
 M2 --script tests/run-tests.m2
+M2 --script examples/toric-flip.m2
 ```
+
+`examples/toric-flip.m2` computes a genuine three-dimensional flip: the toric
+threefold given by the cone on `(1,0,0)`, `(0,1,0)`, `(0,0,1)`, `(1,1,-2)`, which
+is not Q-Gorenstein. Besides the paper's projective setting the package also
+accepts an affine base (`BaseIsProjective => false`), which is what makes such a
+local computation cheap.
 
 ## Layout
 
