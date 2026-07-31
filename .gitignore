@@ -1,0 +1,8 @@
+.DS_Store
+*~
+*.m2~
+.M2/
+scratch/
+tmp/
+*.log
+*.out
