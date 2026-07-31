@@ -41,7 +41,10 @@ M2 --script tests/run-tests.m2
 | `FlipComputation/` | implementation split by topic |
 | `examples/` | worked examples |
 | `tests/` | regression tests |
-| `docs/` | notes relating the code to the paper |
+| `docs/` | notes relating the code to the paper, and the development plan |
+
+See `docs/implementation-notes.md` for the correspondence with the paper and
+`docs/roadmap.ja.md` for what is planned next.
 
 ## License
 
