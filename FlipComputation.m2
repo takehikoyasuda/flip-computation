@@ -143,6 +143,56 @@ TEST ///
   assert(not isSmallProjection Q);
 ///
 
+-- Generators of I^(m) of different degrees, over a weighted projective base.
+-- Grading the threefold of examples/toric-flip.m2 by l = (3,2,1) gives the
+-- Hilbert basis degrees 2,5,3,6,7 and an I^(1) with generators in degrees 2 and
+-- 3.  Forcing them into the single degree 3 -- the old behaviour, still
+-- available as UniformDegree -- needs R_1, which is zero, so it drops a
+-- generator and blows up the wrong ideal; it reports the projection as not
+-- small, where it is.  Weighting the fibre variables instead gets it right.
+TEST ///
+  rayList = {{1,0,0}, {0,1,0}, {0,0,1}, {1,1,-2}};
+  HB = apply(hilbertBasis dualCone coneFromVData transpose matrix rayList,
+      v -> flatten entries v);
+  ell = {3,2,1};
+  degs = apply(HB, h -> sum apply(3, k -> h#k * ell#k));
+  assert(degs == {2,5,3,6,7});
+  L = QQ[t1,t2,t3];
+  S0 = QQ[y_1 .. y_(#HB), Degrees => degs];
+  I0 = ker map(L, S0, apply(HB, h -> t1^(h#0) * t2^(h#1) * t3^(h#2)));
+  S = QQ[y_1 .. y_(#HB), w, Degrees => degs | {1}];
+  R = S/sub(I0, S);
+
+  (s, Ed) = flipDivisorData R;
+  J = divisorialIdeal(Ed, 1);
+  assert(sort flatten degrees J == {2,3});          -- genuinely mixed
+  assert(uniformDegree J == 3);
+
+  P = bigradedReesProjection J;
+  assert(apply(P#fiberVariables, v -> degree v) == {{1,0},{1,1}});
+  assert(isSmallProjection P);
+  assert(isS2Source P);
+
+  -- forcing a single degree gets the opposite answer
+  Pold = bigradedReesProjection(J, UniformDegree => 3);
+  assert(not isSmallProjection Pold);
+
+  -- and the right answer restricts to the affine one, which never needed any of
+  -- this because the x variables carry no grading there
+  Paff = bigradedReesProjection(divisorialIdeal(
+          last flipDivisorData(S0/I0, BaseIsProjective => false), 1),
+      BaseIsProjective => false);
+  A = P#ambientRing;
+  us = P#fiberVariables;
+  xs = P#baseVariables;
+  phi = map(A, Paff#ambientRing, us | take(xs, #HB));
+  assert(trim (P#definingIdeal + ideal(last xs - 1))
+      == trim (phi(Paff#definingIdeal) + ideal(last xs - 1)));
+
+  -- the Segre construction does not apply once the fibre variables are weighted
+  assert(try (b2mToGraphMorphism P; false) else true);
+///
+
 -- The schedule of multipliers is every divisor of MaxSteps! in increasing
 -- order, which still contains the factorials the paper prescribes.
 TEST ///

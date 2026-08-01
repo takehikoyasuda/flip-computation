@@ -38,6 +38,13 @@ b2mToGraphMorphism B2MProjection := o -> P -> (
     if not isProjectiveBase P then error(
         "b2mToGraphMorphism: the base must be projective; "
         | "a graph morphism of monograded varieties has no affine analogue here");
+    -- Lemma 2.3 needs the fiber variables to have bidegree (d_j, 0).  They do
+    -- exactly when the generators of the blown up ideal share a degree; when
+    -- they do not, bigradedReesIdeal weights the fiber direction instead.
+    if any(P#fiberVariables, v -> (degree v)#1 != 0) then error(
+        "b2mToGraphMorphism: the fiber variables carry weights, which happens "
+        | "when the generators of the blown up ideal have different degrees; "
+        | "the Segre construction of Lemma 2.3 does not apply");
     A := P#ambientRing;
     U := P#totalRing;
     R := P#baseRing;
