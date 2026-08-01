@@ -161,13 +161,26 @@ isS2Source B2MProjection := P -> (
 
 -- Codimension of the exceptional locus (the second condition of Lemma 7.2).
 --
--- Write J for the blown up ideal.  Over the open locus where J is invertible the
--- projection pi is an isomorphism, so Exc(pi) is contained in V(J O_Z).  Since X
--- is normal and pi is projective and birational, Zariski's main theorem shows
--- that pi is an isomorphism near any point where it is finite; hence a
--- codimension-one component of Exc(pi) has to be a codimension-one irreducible
--- component of V(J O_Z) that is contracted by pi.  We therefore look for such
--- components.
+-- Write J for the blown up ideal.  We report that pi is small exactly when no
+-- codimension-one component of V(J O_Z) is contracted.  That is equivalent to
+-- codim Exc(pi) >= 2:
+--
+--   * Exc(pi) is contained in V(J O_Z), since the blowup is an isomorphism
+--     wherever J is invertible and J is invertible outside V(J);
+--   * V(J O_Z) is pure of codimension one, because J O_Z is invertible by
+--     construction, hence an effective Cartier divisor;
+--   * so a codimension-one component D of Exc(pi) is a component of V(J O_Z)
+--     and not just contained in one: D lies in some component C, and
+--     dim C = dim Z - 1 = dim D forces C = D;
+--   * components of Exc(pi) are contracted, because X is normal and pi is
+--     projective birational, so Zariski's main theorem makes pi an isomorphism
+--     near any point with finite fibre; and conversely a contracted component
+--     lies in Exc(pi).
+--
+-- This needs only that Z is irreducible, that J is nonzero and that X is normal.
+-- Note that the second point makes the dimension test below redundant -- every
+-- relevant component already has dimension dim Z - 1 -- so it is only a safety
+-- net, and what decides the answer is whether the component is contracted.
 isSmallProjection = method(Options => {Verbose => false})
 isSmallProjection B2MProjection := o -> P -> (
     dZ := geometricDimension P;

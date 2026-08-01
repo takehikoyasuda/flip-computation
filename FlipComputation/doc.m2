@@ -206,12 +206,24 @@ Outputs
   :Boolean
 Description
   Text
-    The exceptional locus of the blowup of an ideal $J$ is contained in
-    $V(J\mathcal{O}_Z)$, since the blowup is an isomorphism where $J$ is
-    invertible.  As $X$ is normal and the projection is projective and
-    birational, Zariski's main theorem shows that any divisorial component of the
-    exceptional locus is an irreducible component of $V(J\mathcal{O}_Z)$ of
-    codimension one that is contracted.  The test looks for such components.
+    Reports that $\pi$ is small exactly when no codimension-one component of
+    $V(J\mathcal{O}_Z)$ is contracted, $J$ being the blown up ideal.
+
+    That is equivalent to $\operatorname{codim}\operatorname{Exc}(\pi) \ge 2$.
+    The exceptional locus is contained in $V(J\mathcal{O}_Z)$, since the blowup
+    is an isomorphism wherever $J$ is invertible and $J$ is invertible outside
+    $V(J)$. Now $J\mathcal{O}_Z$ is invertible by construction, so
+    $V(J\mathcal{O}_Z)$ is an effective Cartier divisor and therefore pure of
+    codimension one; a codimension-one component $D$ of the exceptional locus is
+    thus a {\em component} of $V(J\mathcal{O}_Z)$ and not merely contained in
+    one, because the component containing it has the same dimension. Finally,
+    since $X$ is normal and $\pi$ is projective birational, Zariski's main
+    theorem makes $\pi$ an isomorphism near any point with finite fibre, so
+    components of the exceptional locus are exactly the contracted ones.
+Caveat
+  By the same argument every relevant component already has codimension one, so
+  the dimension test in the implementation cannot fail; it is kept as a safety
+  net, and what decides the answer is whether a component is contracted.
 ///
 
 doc ///

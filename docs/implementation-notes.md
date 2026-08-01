@@ -46,13 +46,33 @@ order "exceptional locus, then normality", and tests normality as `S2` alone
 test on the affine cone over `Z^m`, is still exported but no longer used by the
 algorithm.
 
-**Exceptional locus.** `Exc(pi)` is contained in `V(J O_Z)`, because the blowup
-of `J` is an isomorphism wherever `J` is invertible. Since `X` is normal and
-`pi` is projective and birational, Zariski's main theorem shows that `pi` is an
-isomorphism near a point where it is finite. Hence a codimension-one component
-of `Exc(pi)` must be a codimension-one irreducible component of `V(J O_Z)` that
-is contracted by `pi`, and `isSmallProjection` looks exactly for those. Components
-containing the irrelevant ideal are discarded, as they define the empty set.
+**Exceptional locus.** `isSmallProjection` reports that `pi` is small exactly
+when no irreducible component of `V(J O_Z)` of codimension one is contracted.
+The equivalence with "`codim Exc(pi) >= 2`" runs as follows.
+
+1. `Exc(pi)` is contained in `V(J O_Z)`. The blowup is an isomorphism wherever
+   `J` is invertible, and `J` is invertible at every point outside `V(J)`
+   (there `J_x = R_x`), so the non-isomorphism locus lies over `V(J)`.
+2. `V(J O_Z)` is **pure of codimension one**: `J O_Z` is invertible by
+   construction of the blowup, so `V(J O_Z)` is an effective Cartier divisor and
+   Krull's principal ideal theorem applies.
+3. Hence a codimension-one component `D` of `Exc(pi)` is not merely *contained
+   in* `V(J O_Z)` but is a *component* of it: `D` lies in some component `C`,
+   and `dim C = dim Z - 1 = dim D` forces `C = D`. This is the step that would
+   otherwise need care, and (2) is what closes it.
+4. Components of `Exc(pi)` are contracted. `X` is normal and `pi` is projective
+   birational, so by Zariski's main theorem `pi` is an isomorphism near any point
+   with finite fibre; a component of `Exc` therefore cannot dominate its image.
+   Conversely a contracted component is not an isomorphism at its generic point,
+   so it lies in `Exc`.
+
+This uses only that `Z` is irreducible (the Rees algebra of a domain), that
+`J` is nonzero, and that `X` is normal — all standing assumptions.
+
+Components containing the irrelevant ideal are discarded, as they define the
+empty set. Note that by (2) the dimension test in the code is redundant: every
+relevant component already has dimension `dim Z - 1`, so what actually decides
+the answer is whether it is contracted. The test is kept as a safety net.
 
 **Choice of s.** Steps 2 and 3 together amount to embedding `omega_X` into `R`
 as an ideal: the ideal `I = O_X(K_X - div(s))` of Step 3 is isomorphic to
