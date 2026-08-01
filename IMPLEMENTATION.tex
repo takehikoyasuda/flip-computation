@@ -212,6 +212,12 @@ derivations made here for the reader rather than assertions in the
 suite, and are marked as such. The excerpts are trimmed; the complete
 input and output are in the repository.
 
+The systems of equations quoted below are exactly what this version
+returns. They are Gr\"obner basis output, so the order in which the
+generators are listed --- though not the ideal they generate, and not
+any statement made about it here --- may differ under another version of
+Macaulay2.
+
 \section{Representative Macaulay2
 calculations}\label{representative-macaulay2-calculations}
 
@@ -228,6 +234,19 @@ with circuit relation \(v_1 + v_2 = 2v_3 + v_4\), and let
 force \(m = (1,1,1)\) and then \(\langle m, v_4\rangle = 0\) --- so
 \textbf{\(X\) is not \QQ{}-Gorenstein}, and this is the case the paper is
 aimed at.
+
+The Hilbert basis of \(\sigma^\vee \cap M\) has five elements, so this
+\(X\) is a threefold in \(\bbA^5\), and the input handed to the
+algorithm is the three quadrics cutting it out:
+
+\begin{verbatim}
+y_4^2-y_2*y_5     y_3*y_4-y_1*y_5     y_2*y_3-y_1*y_4
+\end{verbatim}
+
+\noindent
+equivalently, the \(2 \times 2\) minors of
+
+\[\begin{pmatrix} y_1 & y_2 & y_4 \\ y_3 & y_4 & y_5 \end{pmatrix}.\]
 
 A circuit has exactly two triangulations, and toric intersection theory
 gives the sign of \(K \cdot C\) on the wall curve from the wall relation
@@ -261,7 +280,31 @@ succeeds at \(m = 1\):
 -- the flip is obtained for m = 1
 \end{verbatim}
 
-and the output is then dissected:
+\noindent
+and returns \(Z \subset \PP^1 \times X\) cut out by
+
+\begin{verbatim}
+y_4^2-y_2*y_5     y_3*y_4-y_1*y_5     u_1*y_4-u_2*y_5
+y_2*y_3-y_1*y_4   u_1*y_2-u_2*y_4     u_1*y_1-u_2*y_3
+\end{verbatim}
+
+\noindent
+The three equations of \(X\) survive, and three more appear, each linear
+in \(u\). Together they are once again the \(2 \times 2\) minors of a
+single matrix --- the matrix of \(X\) with one column adjoined:
+
+\[I_2\begin{pmatrix} y_1 & y_2 & y_4 \\ y_3 & y_4 & y_5 \end{pmatrix}
+  \;\rightsquigarrow\;
+  I_2\begin{pmatrix} u_2 & y_1 & y_2 & y_4 \\
+                     u_1 & y_3 & y_4 & y_5 \end{pmatrix}.\]
+
+On this example, then, the flip is the operation of adjoining the fibre
+coordinates as a new column. The identity is not read off by eye: the
+ideal returned by \texttt{computeFlip} is compared with
+\texttt{minors(2,M)} in Macaulay2 and they are equal, and \(Z\) has
+codimension three and degree four.
+
+The output is then dissected:
 
 \begin{verbatim}
 blown up ideal I = O_X(-E): ideal (y_5, y_4)
@@ -347,6 +390,32 @@ the fan of Z ... equals the expected triangulation {v1,v2,v3}, {v1,v2,v4}: true
 chart u_1 = 1:  dim 3,  smooth: false
 chart u_2 = 1:  dim 3,  smooth: true
 \end{verbatim}
+
+Here the input is six equations rather than three, of degrees
+\(2,2,2,3,3,3\):
+
+\begin{verbatim}
+y_5^2-y_3*y_6       y_4*y_5-y_2*y_6      y_3*y_4-y_2*y_5
+y_2*y_4^2-y_1*y_6   y_2^2*y_4-y_1*y_5    y_2^3-y_1*y_3
+\end{verbatim}
+
+\noindent
+All six survive in the output, joined by four that are linear in \(u\):
+
+\begin{verbatim}
+u_1*y_1-u_2*y_2       u_1*y_2^2-u_2*y_3
+u_1*y_2*y_4-u_2*y_5   u_1*y_4^2-u_2*y_6
+\end{verbatim}
+
+\noindent
+Nothing as tidy as the determinantal identity above holds here: the
+\(2 \times 2\) minors of the corresponding \(2 \times 5\) matrix lie in
+the ideal but do not generate it. What these equations do show is the
+weighted fibre grading at work. The two generators of
+\(I^{(2)} = (y_6, y_4^2)\) have degrees \(1\) and \(2\), so they are not
+levelled; the fibre weights are \(\deg u_1 = (1,0)\) and
+\(\deg u_2 = (1,1)\), and the last relation \(u_1 y_4^2 - u_2 y_6\) is
+not bilinear. It is bihomogeneous only for those weights.
 
 \(m = 1\) is rejected for the right reason --- a \emph{contracted}
 component of dimension two, that is a divisor in the exceptional locus
