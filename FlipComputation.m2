@@ -50,6 +50,7 @@ export {
     "isSmallProjection",
     "isNormalSource",
     "isS2Source",
+    "multiplierSchedule",
     "computeFlip",
     -- options
     "Section",
@@ -140,6 +141,16 @@ TEST ///
   Q = bigradedReesProjection(ideal(y0,y1,y2), BaseIsProjective => false);
   assert(geometricDimension Q == 3);
   assert(not isSmallProjection Q);
+///
+
+-- The schedule of multipliers is every divisor of MaxSteps! in increasing
+-- order, which still contains the factorials the paper prescribes.
+TEST ///
+  assert(multiplierSchedule 3 == {1,2,3,6});
+  assert(multiplierSchedule 4 == {1,2,3,4,6,8,12,24});
+  assert(all({1,2,3,4,5}, n ->
+      isSubset(set apply(1..n, e -> e!), set multiplierSchedule n)));
+  assert(all({1,2,3,4,5}, n -> multiplierSchedule n == sort multiplierSchedule n));
 ///
 
 -- On a small projection R1 comes for free, so normality reduces to S2.  Check

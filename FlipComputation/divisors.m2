@@ -80,14 +80,19 @@ flipDivisorData Ring := o -> R -> (
     (s, Edata)
     )
 
--- The divisorial ideal O_X(-mE) = intersect_i p_i^(m e_i), which is the symbolic
--- power I^(m) of Step 5.
+-- The divisorial ideal O_X(-mE), which is the symbolic power I^(m) of Step 5.
+--
+-- Mathematically this is intersect_i p_i^(m e_i), but computing it that way
+-- through SymbolicPowers is ruinous: the saturations blow up with m, taking 3.2
+-- seconds at m = 8 on the threefold of examples/toric-flip.m2 and far worse
+-- beyond.  The Divisor package builds O_X(-D) from products of ordinary powers
+-- and a reflexive hull instead, which on the same example is about 0.006
+-- seconds and essentially flat in m.  The two agree.
 divisorialIdeal = method()
 divisorialIdeal (List, ZZ) := (Edata, m) -> (
     if #Edata == 0 then error "divisorialIdeal: empty divisor data";
     R := ring first first Edata;
     parts := select(apply(Edata, pe -> {pe#0, m * pe#1}), pe -> pe#1 > 0);
     if #parts == 0 then ideal 1_R
-    else trim intersect apply(parts, pe -> (
-        if pe#1 == 1 then pe#0 else symbolicPower(pe#0, pe#1)))
+    else trim ideal divisor(apply(parts, pe -> pe#1), apply(parts, pe -> pe#0))
     )

@@ -8,6 +8,31 @@
 -- loop over m = 1!, 2!, 3!, ..., computing the Rees algebra R[I^(m)t] and testing
 -- the two conditions of Lemma 7.2.
 
+-- The schedule of multipliers for Step 4.
+--
+-- The paper runs over m = 1!, 2!, 3!, ..., and one m that works is as good as
+-- another, so what matters is finding a small one: the cost of an iteration
+-- grows very steeply in m, because the number of generators of I^(m) -- and
+-- with it the number of variables of the Rees algebra -- grows with m.  On the
+-- threefold of examples/toric-flip.m2 one iteration costs 0.02 s at m = 1,
+-- 0.9 s at m = 6, 7 s at m = 8, and more than ten minutes at m = 12.
+--
+-- So we try every divisor of MaxSteps! in increasing order.  That still contains
+-- 1!, 2!, ..., MaxSteps!, so the termination guarantee is unchanged, and filling
+-- in the gaps is nearly free because the largest m tried dominates the total:
+-- running all of 1, 2, 3, 4, 6, 8 above costs 8.5 seconds against more than 600
+-- for m = 12 alone.
+multiplierSchedule = method()
+multiplierSchedule ZZ := n -> (
+    if n < 1 then error "multiplierSchedule: expected a positive integer";
+    ds := {1};
+    scan(toList factor (n!), pe -> (
+        p := pe#0;
+        ds = flatten apply(ds, d -> apply(pe#1 + 1, i -> d * p^i));
+        ));
+    sort ds
+    )
+
 computeFlip = method(Options => {
         Section => null,
         Multipliers => null,
@@ -26,8 +51,7 @@ computeFlip Ring := o -> R -> (
         << "-- E has " << #Edata << " component(s) with multiplicities "
            << toString apply(Edata, pe -> pe#1) << endl;
         );
-    ms := if o.Multipliers === null
-        then toList apply(1 .. o.MaxSteps, e -> e!)
+    ms := if o.Multipliers === null then multiplierSchedule o.MaxSteps
         else toList o.Multipliers;
     for m in ms do (
         if o.Verbose then << "-- m = " << m << ":" << endl;

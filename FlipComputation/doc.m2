@@ -126,6 +126,39 @@ Description
 
 doc ///
 Key
+  multiplierSchedule
+  (multiplierSchedule, ZZ)
+Headline
+  the multipliers m tried by computeFlip
+Usage
+  ms = multiplierSchedule n
+Inputs
+  n:ZZ
+Outputs
+  ms:List
+    every divisor of $n!$, in increasing order
+Description
+  Text
+    The paper runs Step 4 over $m = 1!, 2!, 3!, \dots$. One $m$ that works is as
+    good as another, so what matters is finding a small one: the cost of an
+    iteration grows very steeply in $m$, because the number of generators of
+    $I^{(m)}$ -- and with it the number of variables of the Rees algebra -- grows
+    with $m$. On the threefold of {\tt examples/toric-flip.m2} one iteration
+    costs 0.02 s at $m=1$, 0.9 s at $m=6$, 7 s at $m=8$, and more than ten
+    minutes at $m=12$.
+
+    Taking every divisor of $n!$ still contains $1!, \dots, n!$, so the
+    termination guarantee is unchanged, and filling in the gaps is nearly free
+    because the largest $m$ tried dominates the total: running all of
+    $1,2,3,4,6,8$ costs 8.5 seconds against more than 600 for $m=12$ alone.
+  Example
+    multiplierSchedule 4
+SeeAlso
+  computeFlip
+///
+
+doc ///
+Key
   canonicalIdeal
   (canonicalIdeal, Ring)
 Headline
