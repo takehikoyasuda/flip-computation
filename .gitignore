@@ -6,3 +6,8 @@ scratch/
 tmp/
 *.log
 *.out
+*.aux
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk

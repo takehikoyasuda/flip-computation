@@ -1,0 +1,585 @@
+% Computing Threefold Flips in Macaulay2
+% Companion note to the FlipComputation package.
+% Build:  pdflatex IMPLEMENTATION.tex   (twice, for the references)
+\documentclass[11pt,reqno]{amsart}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,longtable,array}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,
+            citecolor=blue!50!black]{hyperref}
+
+% Verbatim blocks hold Macaulay2 input and output.
+\usepackage{fancyvrb}
+\fvset{fontsize=\small,xleftmargin=1em}
+
+% pandoc emits \tightlist for lists without blank lines between items.
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Long \texttt identifiers cannot hyphenate; give the paragraph builder room.
+\setlength{\emergencystretch}{3em}
+
+% Notation.  These are the commands GitHub's markdown renderer refuses, which is
+% why the markdown version of this note had to spell them with Unicode letters.
+\newcommand{\PP}{\ensuremath{\mathbb{P}}}
+\newcommand{\QQ}{\ensuremath{\mathbb{Q}}}
+\newcommand{\RR}{\ensuremath{\mathbb{R}}}
+\newcommand{\bbA}{\ensuremath{\mathbb{A}}}
+\newcommand{\sO}{\ensuremath{\mathcal{O}}}
+
+\DeclareMathOperator{\Proj}{Proj}
+\DeclareMathOperator{\Spec}{Spec}
+\DeclareMathOperator{\divisor}{div}
+\DeclareMathOperator{\Bl}{Bl}
+\DeclareMathOperator{\codim}{codim}
+\DeclareMathOperator{\Exc}{Exc}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Computing Threefold Flips in Macaulay2}
+\author{Takehiko Yasuda}
+\date{August 2026}
+
+\begin{document}
+
+\begin{abstract}
+We implement Algorithm 3 (Computing a flip) of the
+author\textquotesingle s paper on the minimal model program in dimension
+three, and run it on explicit threefolds. Given the coordinate ring of
+the target \(X\) of a flipping contraction, the implementation produces
+the flip as
+
+\[Z = \Proj\, R[I^{(m)}t] \longrightarrow X,\]
+
+together with the certificates of Lemma 7.2 --- that \(Z\) is normal and
+that the exceptional locus has codimension at least two. The centrepiece
+is a genuine three-dimensional flip of a non-\QQ{}-Gorenstein toric
+singularity, computed from end to end and checked against toric geometry
+derived independently of the algorithm. This note is not a formal
+verification; it records a reproducible experiment and sets out
+precisely which claims the computations do and do not support. The code
+and this note were written essentially by an AI system, with edits by
+the author; see Section~\ref{use-of-ai-in-the-implementation}.
+\end{abstract}
+
+\maketitle
+
+\section{Purpose and background}\label{purpose-and-background}
+
+Let \(f : Y \to X\) be a flipping contraction: a small projective
+birational morphism of normal threefolds with \(-K_Y\) \(f\)-ample and
+relative Picard rank one. Its \textbf{flip} is the small projective
+birational \(g : Z \to X\) with \(K_Z\) \(g\)-ample. Existence is a
+theorem; the question here is whether the flip can be \emph{computed}
+from equations.
+
+Algorithm 3 of the paper answers this by the classical construction
+
+\[Z = \Proj_X \; \bigoplus_{k \geq 0} \; \sO_X(-kmE), \qquad E \sim -K_X,\]
+
+which is a flip once \(m\) is chosen so that the algebra is finitely
+generated and the result is normal and small. The algorithm searches for
+such an \(m\) and verifies the two conditions rather than assuming them.
+
+The input is the homogeneous coordinate ring \(R\) of \(X\), so that
+\(X = \Proj\, R\) sits in a weighted projective space; the
+output is a \textbf{B2M projection}, a bigraded variety
+\(Z \subset \PP^{r-1} \times X\) together with its projection to \(X\)
+(Definition 2.4 of the paper). Beyond the scope of the paper, the
+implementation also accepts an affine base \(X = \Spec\, R\),
+which is what makes computation at a single singularity cheap.
+
+\section{What the algorithm
+computes}\label{what-the-algorithm-computes}
+
+Writing \(K_X = \sum_i n_i D_i\) with \(D_i = V(p_i)\) of height one,
+the five steps are:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  compute \(K_X\);
+\item
+  choose a homogeneous \(s\) with \(-K_X + \divisor(s)\) effective;
+\item
+  form \(I = \sO_X(K_X - \divisor(s))\) and \(E\) with
+  \(I = \sO_X(-E)\);
+\item
+  for \(m = 1!, 2!, 3!, \dots\);
+\item
+  build \(Z^m = \Proj\, R[I^{(m)}t]\) and test Lemma 7.2 ---
+  return \(Z^m\) at the first \(m\) that passes.
+\end{enumerate}
+
+Steps 1--3 are \texttt{flipDivisorData}, step 5 is
+\texttt{bigradedReesProjection} together with \texttt{isSmallProjection}
+and \texttt{isS2Source}, and the loop is \texttt{computeFlip}.
+
+\subsection{Where the implementation departs from the
+paper}\label{where-the-implementation-departs-from-the-paper}
+
+Four departures matter mathematically. The first is a correction; the
+others are reformulations that leave the answer alone and change the
+cost by orders of magnitude.
+\href{https://github.com/takehikoyasuda/flip-computation/blob/main/docs/implementation-notes.md}{\texttt{docs/implementation-notes.md}}
+gives the full argument and the measurements for each.
+
+\textbf{Weights on the fibre, not levelled generators.} Presenting
+\(Z^m\) inside \(X \times \PP^{r-1}\), with one fibre coordinate \(u_i\)
+per generator \(f_i\) of \(I^{(m)}\), makes the Rees relations
+bihomogeneous only if the \(f_i\) share a degree ---
+\(u_i \mapsto f_i t\) forces \(\deg u_i = \deg f_i + \deg t\) to be
+independent of \(i\). Replacing \(I^{(m)}\) by the ideal generated by
+its degree-\(D\) part is the obvious repair and is what this package
+originally did. \textbf{It is unsound over a weighted grading:} that
+ideal is \(\sum_i R_{D-d_i} f_i\), and \(R_{D-d_i}\) can vanish,
+dropping \(f_i\) outright. Grading the threefold below by
+\(\ell = (3,2,1)\) gives ring degrees \(2,5,3,6,7\) and generators in
+degrees 2 and 3, so \(D = 3\) needs \(R_1 = 0\) --- and the projection
+is then reported as \emph{not small when it is small}. Enlarging \(D\)
+does not help; the \(D\) that preserve the sheaf are sparse,
+non-monotone, and sometimes absent. The implementation instead weights
+the fibre direction, with \(d_0 = \min_i d_i\):
+
+\[\deg u_i = (1,\, d_i - d_0), \qquad \deg x_j = (0,\, c_j), \qquad
+\deg t = (1,\, -d_0),\]
+
+so that \(u^a x^b\) has bidegree \((|a|,\, \deg(f^a x^b) - |a| d_0)\)
+--- exactly what its image \(f^a x^b t^{|a|}\) records. The kernel is
+bihomogeneous whatever the degrees of the \(f_i\), and when they agree
+this \emph{is} the paper\textquotesingle s \(\deg u_i = (1,0)\).
+
+\textbf{Normality reduces to \(S_2\).} A small projection satisfies
+\(R_1\) automatically: a codimension-one point of \(Z\) cannot lie in
+the exceptional locus, so \(\pi\) is a local isomorphism there and the
+local ring is that of \(X\) at a codimension-one point, hence a DVR.
+Testing smallness \emph{first} therefore reduces normality to \(S_2\).
+This is not a small saving: on one example the \(R_1\) half of
+\texttt{isNormal} took 119 s, passing through a Jacobian minor ideal
+with 1 436 495 generators, against 0.02 s for \(S_2\).
+
+\textbf{\(\omega_X\) embedded directly.} Steps 2 and 3 together amount
+to embedding \(\omega_X\) into \(R\) as an ideal, so instead of choosing
+\(s\) the implementation takes a homomorphism \(\omega_X \to R\) of
+least degree. The \(s\) of Step 2 inherits whichever representative of
+the canonical class the \texttt{Divisor} package returns; under the
+grading \(\ell = (2,2,1)\) that gives \(s = y_3^{11}\) and an
+\(I^{(1)}\) in degree 30, and the computation does not finish in
+seventeen minutes. The direct embedding gives generators of degree 2 and
+takes 0.05 s --- on the same threefold.
+
+\textbf{Every divisor of \(\texttt{MaxSteps}!\).} One \(m\) that works
+is as good as another, so what matters is finding a \emph{small} one,
+and the cost per iteration grows steeply: on the threefold below, 0.02 s
+at \(m=1\) against more than 600 s at \(m=12\). Trying every divisor of
+\(\texttt{MaxSteps}!\) in increasing order still contains
+\(1!, 2!, \dots\), so termination is unchanged, while filling the gaps
+is nearly free.
+
+\section{Environment and
+reproducibility}\label{environment-and-reproducibility}
+
+Computed with Macaulay2 1.24.11 on macOS (Apple Silicon), using the
+bundled packages \texttt{Divisor}, \texttt{SymbolicPowers},
+\texttt{Polyhedra}, \texttt{IntegralClosure}, \texttt{MinimalPrimes} and
+\texttt{Elimination}. From the repository root:
+
+\begin{verbatim}
+M2 --script tests/run-tests.m2          # 13 regression tests, about 5 s
+M2 --script examples/toric-flip.m2      # about 1 s
+\end{verbatim}
+
+Measured wall-clock times: the test suite 5 s, \texttt{toric-flip.m2}
+1.0 s, \texttt{toric-flip-projective.m2} 1.3 s,
+\texttt{toric-flip-index-two.m2} 2.7 s,
+\texttt{ordinary-double-point.m2} 0.6 s. The checks quoted below ---
+fans, signs, dimensions, smoothness, the agreement between code paths
+--- are \texttt{assert}ed by the regression suite rather than merely
+printed, so a regression shows up as a test failure. A few remarks are
+derivations made here for the reader rather than assertions in the
+suite, and are marked as such. The excerpts are trimmed; the complete
+input and output are in the repository.
+
+\section{Representative Macaulay2
+calculations}\label{representative-macaulay2-calculations}
+
+\subsection{A flip of a non-\QQ{}-Gorenstein toric
+threefold}\label{a-flip-of-a-non-ux211a-gorenstein-toric-threefold}
+
+Let \(\sigma \subset N_\RR{} = \RR^3\) be the cone on
+
+\[v_1 = (1,0,0), \quad v_2 = (0,1,0), \quad v_3 = (0,0,1), \quad v_4 = (1,1,-2),\]
+
+with circuit relation \(v_1 + v_2 = 2v_3 + v_4\), and let
+\(X = \Spec\, k[\sigma^\vee \cap M]\). No \(m \in M_\QQ{}\) has
+\(\langle m, v_i\rangle = 1\) for all four rays --- the first three
+force \(m = (1,1,1)\) and then \(\langle m, v_4\rangle = 0\) --- so
+\textbf{\(X\) is not \QQ{}-Gorenstein}, and this is the case the paper is
+aimed at.
+
+A circuit has exactly two triangulations, and toric intersection theory
+gives the sign of \(K \cdot C\) on the wall curve from the wall relation
+alone:
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+triangulation & wall & \(K \cdot C\) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\langle v_1,v_2,v_3\rangle, \langle v_1,v_2,v_4\rangle\) &
+\(\langle v_1,v_2\rangle\) & \(-(2+1-1-1) = -1\) \\
+\(\langle v_1,v_3,v_4\rangle, \langle v_2,v_3,v_4\rangle\) &
+\(\langle v_3,v_4\rangle\) & \(-(1+1-2-1) = +1\) \\
+\end{longtable}
+
+So the first is the flipping contraction \(Y \to X\) and \textbf{the
+second is the flip \(Z \to X\)}. This is known before the algorithm is
+run, and it is what the output is compared against. The algorithm
+succeeds at \(m = 1\):
+
+\begin{verbatim}
+-- I = omega_X, embedded in R by a map of least degree
+-- E has 2 component(s) with multiplicities {1, 1}
+-- m = 1:
+--   Z^m sits in P^1 x X, dim Z^m = 3
+  component of dim 2 (not contracted)
+  component of dim 2 (not contracted)
+-- the flip is obtained for m = 1
+\end{verbatim}
+
+and the output is then dissected:
+
+\begin{verbatim}
+blown up ideal I = O_X(-E): ideal (y_5, y_4)
+fibre over the fixed point has dimension 1
+chart u_1 = 1:  dim 3,  smooth: true
+chart u_2 = 1:  dim 3,  smooth: true
+
+the fan of Z has maximal cones
+  {{0, 1, 0}, {1, 1, -2}, {0, 0, 1}}
+  {{1, 0, 0}, {1, 1, -2}, {0, 0, 1}}
+equals the expected triangulation {v1,v3,v4}, {v2,v3,v4}:  true
+
+Z: wall relation {1, 1, -1, -2},  K.C ~ 1
+Y: wall relation {1, 2, -1, -1},  K.C ~ -1
+
+K_Z is pi-ample and K_Y is pi-anti-ample, so Z is the flip of Y.
+\end{verbatim}
+
+Three things are confirmed at once. \(I\) has exactly two generators, so
+\(Z\) lands in \(\PP^1 \times X\) --- one homogeneous coordinate per
+maximal cone of \(Z\). The fan recovered from those generators is the
+triangulation
+\(\langle v_1,v_3,v_4\rangle, \langle v_2,v_3,v_4\rangle\). And the sign
+of \(K \cdot C\), computed from the wall relation, is \(+1\): the
+algorithm returned the flip and not the contraction it came from.
+
+Also checked here: \texttt{canonicalDivisorData} returns \(-D_1 - D_3\)
+rather than the torus-invariant \(-\sum_i D_i\), and the two differ by
+the principal divisor \(\divisor(y_1) = D_2 + D_4\), so they are
+linearly equivalent as they must be.
+
+\subsection{The same flip over a projective
+base}\label{the-same-flip-over-a-projective-base}
+
+Every element of the Hilbert basis pairs to 1 with \(\ell = (1,1,-1)\),
+so the standard grading is induced by a torus character and
+
+\[X_{\mathrm{proj}} = \Proj\, k[y_1,\dots,y_5,w]/I \subset \PP^5,
+\qquad \deg w = 1\]
+
+is a projective threefold with \(D_+(w) = \Spec\, R\).
+Projecting the rays of \(\tau = \sigma \times \RR_{\geq 0}\) shows its
+only singularity is the vertex --- the point to be flipped --- so this
+is the paper\textquotesingle s setting with nothing extra added.
+
+\begin{verbatim}
+degrees for l = (1,1,-1): {1, 1, 1, 1, 1}  (so the standard grading works)
+singular locus is the vertex [0:...:0:1]: true
+-- the flip is obtained for m = 1
+I = ideal (y_5, y_4),  uniform degree used = null
+affine I was ideal (y_5, y_4), the same ideal
+Z_proj: 12 nonempty charts, dimensions {3}, all smooth: true
+Z_proj restricted to D_+(w) equals the affine flip: true
+\end{verbatim}
+
+The last line is the check that matters: the graded and ungraded code
+paths, which share very little, agree \emph{exactly} on the overlap.
+
+\subsection{\texorpdfstring{A flip that needs
+\(m = 2\)}{A flip that needs m = 2}}\label{a-flip-that-needs-m--2}
+
+Replacing \(v_4\) by \((1,3,-2)\), with circuit relation
+\(v_1 + 3v_2 = 2v_3 + v_4\), reverses which triangulation carries the
+\(\pi\)-ample canonical class, and the flip becomes singular:
+\(\langle v_1,v_2,v_4\rangle\) has determinant \(-2\), and
+\(\langle m, v_1\rangle = \langle m, v_2\rangle = \langle m, v_4\rangle = 1\)
+needs \(m = (1,1,3/2)\), so \(K_Z\) is 2-Cartier but not Cartier. This
+is the first example in which the loop over \(m\) actually iterates:
+
+\begin{verbatim}
+-- m = 1:
+--   Z^m sits in P^2 x X, dim Z^m = 3
+  component of dim 2 (contracted)
+  component of dim 2 (not contracted)
+--   exceptional locus contains a divisor
+-- m = 2:
+--   Z^m sits in P^1 x X, dim Z^m = 3
+  component of dim 2 (not contracted)
+-- the flip is obtained for m = 2
+
+I^(2) = ideal (y_6, y_4^2)
+the fan of Z ... equals the expected triangulation {v1,v2,v3}, {v1,v2,v4}: true
+chart u_1 = 1:  dim 3,  smooth: false
+chart u_2 = 1:  dim 3,  smooth: true
+\end{verbatim}
+
+\(m = 1\) is rejected for the right reason --- a \emph{contracted}
+component of dimension two, that is a divisor in the exceptional locus
+--- and not by the normality test, which \(Z^1\) passes. The index of
+\(K_Z\) being 2 and the required \(m\) being 2 agree, and one chart is
+singular exactly as the determinant predicts.
+
+\subsection{The ordinary double point, and the graph
+morphism}\label{the-ordinary-double-point-and-the-graph-morphism}
+
+The small resolution of the threefold ODP \(x_0x_1 = x_2x_3\) is the
+standard sanity check, and it also exercises the Section 2 machinery:
+the Segre construction of Lemma 2.3 turns the B2M projection into a
+genuine morphism of monograded varieties (Lemma 2.6).
+
+\begin{verbatim}
+K_X = {{ideal(x2,x0), -3}, {ideal(x3,x0), -3}}
+Z is normal:      true
+pi is small:      true
+-- Segre product has 10 generators
+graph morphism with graph of dim 3
+\end{verbatim}
+
+The canonical divisor is an independent check, though this last reading
+is a derivation rather than an assertion in the suite:
+\(D_1 = V(x_0,x_2)\) and \(D_2 = V(x_0,x_3)\) are the two planes cut by
+\(x_0 = 0\), so \(D_1 + D_2 = \divisor(x_0) \sim H\) and the
+computed \(-3D_1 - 3D_2\) is \(-3H\) --- the right canonical class for a
+quadric threefold.
+
+\section{Why the answers are believed to be
+correct}\label{why-the-answers-are-believed-to-be-correct}
+
+No claim of formal verification is made. What the repository does
+provide is a set of checks that are \textbf{independent of the algorithm
+being tested}, in the sense that they are computed from the toric data
+or from classical geometry rather than from the object the algorithm
+returns.
+
+\textbf{1. The answer is compared with an independently known answer.}
+For a circuit there are exactly two triangulations, and which one is the
+flip is determined by the sign of \(K \cdot C\) read off from the wall
+relation. The tests recompute that sign from the fan and compare. The
+algorithm is never asked to certify itself.
+
+\textbf{2. Flip versus antiflip is checked, not assumed.} This is the
+sharpest test, because both triangulations give a small birational
+morphism to \(X\) and only the sign of \(K \cdot C\) separates them. A
+sign error in Step 3 would return the contraction instead of its flip
+and would otherwise look entirely healthy. This check is what gives
+confidence in the sign the implementation uses: since
+\(E = \divisor(s) - K_X\) is effective, the ideal \emph{of} \(\sO_X\)
+corresponding to \(\sO_X(K_X - \divisor(s)) = \sO_X(-E)\) carries the
+exponent \(m_i - n_i\), and the computation confirms that this choice
+lands on the \(\pi\)-ample side.
+
+\textbf{3. Independent code paths are made to agree.} The affine route
+uses no grading at all; the projective route grades everything. They
+share the divisor and Rees code but nothing of the degree bookkeeping.
+On \(D_+(w)\) they produce literally the same ideal. Similarly, the two
+routes to \(I\) --- the paper\textquotesingle s \(s\) and the direct
+embedding of \(\omega_X\) --- produce the same divisor \(E\), and
+\texttt{isS2Source} agrees with the full \texttt{isNormalSource} on
+every example where the latter is affordable.
+
+\textbf{4. Negative controls.} Tests that must \emph{fail} do fail:
+blowing up a point of \(\PP^3\), or the origin of \(\bbA^3\), is divisorial
+and is rejected by the smallness test; \(m = 1\) is rejected in the
+index-two example. A test suite of positives only would not detect a
+smallness test that always returns true.
+
+\textbf{5. Classical invariants.} \(K_{\PP^3} = -4H\); the quadric
+threefold has \(K = -3H\); the Segre product of two copies of \(\PP^1\)
+has four generators and \(\PP^1 \times \PP{}(1,2)\) has five. These pin down
+the supporting routines independently of any flip.
+
+\textbf{6. The checks have demonstrably caught a real error.} This is
+the strongest evidence that they are not vacuous. Levelling the
+generators of \(I^{(m)}\) to a single degree --- the natural way to make
+the presentation in \(X \times \PP^{r-1}\) work, and what this package did
+originally --- reports the toric flip above as \textbf{not small} when
+the base is graded by \(\ell = (3,2,1)\), while the affine route reports
+it as small. Seven of eight mixed-degree cases tried had the wrong
+saturation. The discrepancy between two routes that must agree is what
+exposed it; it is now a regression test, and the corrected grading is
+described above.
+
+\subsection{What this does not
+establish}\label{what-this-does-not-establish}
+
+\begin{itemize}
+\tightlist
+\item
+  It is not a proof of the algorithm, and not a proof that the
+  implementation matches the paper. It is evidence that on these inputs
+  the two agree.
+\item
+  All flips computed here are \textbf{toric}, and all are settled by
+  \(m = 1\) or \(m = 2\). Nothing is known about the behaviour at large
+  \(m\) beyond the timings.
+\item
+  Over a weighted grading the \(S_2\) test is \emph{sufficient} but not
+  proved necessary, so the loop may in principle try one more \(m\) than
+  it has to. This affects optimality, not correctness.
+\item
+  No check is made that the input really is the target of a flipping
+  contraction. The algorithm assumes it, and will return something for
+  input that is not.
+\item
+  The base field is \QQ{} in every example; the paper works over
+  \(\overline{\QQ{}}\). Nothing in the code assumes \QQ{}, but number fields are
+  untested.
+\end{itemize}
+
+\section{Summary of results}\label{summary-of-results}
+
+\begin{longtable}[]{@{}llccp{0.44\linewidth}@{}}
+\toprule\noalign{}
+Example & Base & \(m\) & \(\dim Z\) & Independent check \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Toric \((1,1,-2)\) & \(\Spec\) & 1 & 3 & fan \(=\) expected
+triangulation; \(K \cdot C = +1\) \\
+Toric \((1,1,-2)\) & \(\Proj\) & 1 & 3 & restricts to the affine
+answer on \(D_+(w)\); 12 smooth charts \\
+Toric \((1,3,-2)\) & \(\Spec\) & 2 & 3 & \(m=1\) rejected;
+\(K_Z\) of index 2; one chart singular \\
+Toric, \(\ell=(3,2,1)\) & \(\Proj\) & 1 & 3 & agrees with
+affine; levelling gives the wrong answer \\
+ODP, small resolution & both & --- & 3 & normal and small; \(K = -3H\);
+Segre model of dimension 3 \\
+\(\Bl_{pt} \PP^3\), \(\Bl_0 \bbA^3\) & both & --- & 3 &
+correctly rejected as not small \\
+\end{longtable}
+
+\textbf{Interpretation.} On these inputs the implementation reproduces
+flips that are known independently, distinguishes them from their
+antiflips, rejects divisorial contractions, and agrees with itself
+across two code paths and two constructions of \(I\). That is evidence
+that it behaves as intended here. It is neither a proof of the algorithm
+nor a statement about inputs of a different shape.
+
+\section{Limitations}\label{limitations}
+
+\begin{itemize}
+\tightlist
+\item
+  Only toric examples have been run end to end, and only in dimension
+  three.
+\item
+  Only \(m \leq 2\) has been needed; larger \(m\) is exercised for cost,
+  not for correctness.
+\item
+  The Segre construction of Lemma 2.3 requires the fibre variables to
+  have bidegree \((d_j, 0)\), so \texttt{b2mToGraphMorphism} does not
+  apply once the fibre weights are nontrivial, and raises an error.
+  Generalising it is the main open problem left by the correction
+  described above.
+\item
+  There is no affine analogue of the graph morphism at all.
+\item
+  \texttt{isS2Source} dominates the cost at large \(m\) (5.9 s of 7.0 s
+  at \(m = 8\)).
+\item
+  Number fields, and bases that are not \QQ{}, are untested.
+\end{itemize}
+
+\section{Use of AI in the
+implementation}\label{use-of-ai-in-the-implementation}
+
+The Macaulay2 code, the tests, and this note were written essentially by
+an AI system (Claude), with edits by the author. The author has read
+them and believes them correct, but has not checked every line or every
+intermediate computation.
+
+Two things nevertheless make large errors unlikely. First, the algorithm
+is the one in the paper below; little is attempted here that is
+conceptually new, so there is limited room for the code to be quietly
+doing something else. Second, and more to the point, the tests do not
+merely record what the code computes: each example is checked against
+geometry established independently --- the triangulations of a circuit,
+the sign of \(K \cdot C\) from a wall relation, determinants of cones,
+canonical classes of $\PP^3$ and of a quadric threefold --- and those checks
+run automatically. A serious error would have to reproduce all of them
+by accident.
+
+That this is not an idle argument is shown by the levelling bug in item
+6 above: an error that had passed every existing test was found
+precisely because two routes that must agree did not.
+
+None of this replaces a proof.
+
+\section{Conclusion}\label{conclusion}
+
+Algorithm 3 runs, and it produces flips of non-\QQ{}-Gorenstein toric
+threefolds that can be checked against toric geometry --- including the
+case where the flip is singular and the multiplier \(m = 1\) genuinely
+fails. The most useful outcome is not the number of examples but the
+chain connecting the construction in the paper, the source code, the
+actual input, and output that is verified against independently known
+answers. Along the way the implementation turned up one point --- the
+presentation of \(Z^m\) in \(X \times \PP^{r-1}\), and the levelling of
+generators it appears to require --- that needs a hypothesis or a
+reformulation once the base carries a weighted grading; it is recorded
+above and in the implementation notes.
+
+\section{References}\label{references}
+
+\begin{itemize}
+\item
+  \textbf{Yasuda, T.} (2026). An algorithm for the minimal model program
+  in dimension three. arXiv:2603.13703.
+  \url{https://arxiv.org/abs/2603.13703} (Section 2 and Algorithm 3 of
+  Section 7; this repository implements Algorithm 3.)
+\item
+  \textbf{Cox, D. A., Little, J. B. \& Schenck, H. K.} (2011).
+  \emph{Toric Varieties.} Graduate Studies in Mathematics 124, American
+  Mathematical Society. (Circuits, wall relations, and the sign of
+  \(K \cdot C\) used in the checks.)
+\item
+  \textbf{Kollár, J. \& Mori, S.} (1998). \emph{Birational Geometry of
+  Algebraic Varieties.} Cambridge Tracts in Mathematics 134. (Flips and
+  flipping contractions.)
+\item
+  \textbf{Grayson, D. R. \& Stillman, M. E.} Macaulay2, a software
+  system for research in algebraic geometry.
+  \url{https://macaulay2.com/}
+\item
+  \textbf{Schwede, K., Smith, Z. et al.} The \texttt{Divisor} package
+  for Macaulay2. (Canonical divisors and divisorial ideals; used in
+  place of \texttt{SymbolicPowers}.)
+\end{itemize}
+
+\end{document}

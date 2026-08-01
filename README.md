@@ -64,12 +64,21 @@ cheap.
 | `FlipComputation/` | implementation split by topic |
 | `examples/` | worked examples |
 | `tests/` | regression tests |
-| `IMPLEMENTATION.md` | technical note: the construction, the examples, and what they verify |
+| `IMPLEMENTATION.tex`, `.pdf` | technical note: the construction, the examples, and what they verify |
 | `docs/` | notes relating the code to the paper, and the development plan |
 
-The technical note [IMPLEMENTATION.md](IMPLEMENTATION.md) describes the
+The technical note [IMPLEMENTATION.pdf](IMPLEMENTATION.pdf) describes the
 mathematics, the worked examples with their actual Macaulay2 output, and the
-independent checks that the answers are compared against.
+independent checks that the answers are compared against.  It is written in
+LaTeX rather than markdown because GitHub's markdown renderer refuses
+`\newcommand`, `\operatorname`, `\mathbb`, `\mathcal` and `\tag`, and eats the
+backslash in `\,` and `\\`, which between them rule out macros, multi-line
+formulas and equation numbers.  Rebuild it with
+
+```
+pdflatex IMPLEMENTATION.tex      # twice, for the cross-references
+```
+
 `docs/implementation-notes.md` gives the line-by-line correspondence with the
 paper and the measurements, and `docs/roadmap.ja.md` records what is planned
 next.
@@ -85,7 +94,7 @@ triangulations of a circuit, the sign of `K.C` on the wall curve, determinants o
 cones, canonical classes of `P^3` and of a quadric threefold — so large errors are
 unlikely.  It is a research prototype, not verified software.  One error that had
 survived every existing test was in fact caught this way; see
-[IMPLEMENTATION.md](IMPLEMENTATION.md).
+[IMPLEMENTATION.pdf](IMPLEMENTATION.pdf).
 
 ## License
 
