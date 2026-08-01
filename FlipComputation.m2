@@ -222,6 +222,50 @@ TEST ///
   assert(-(sum rel) > 0);
 ///
 
+-- The same flip in the projective setting of the paper.  Every element of the
+-- Hilbert basis pairs to 1 with l = (1,1,-1), so the standard grading is induced
+-- by a torus character and X_proj = Proj k[y,w]/I sits in P^5 with
+-- D_+(w) = X_aff.  Its only singularity is the vertex.  See
+-- examples/toric-flip-projective.m2.
+TEST ///
+  rayList = {{1,0,0}, {0,1,0}, {0,0,1}, {1,1,-2}};
+  HB = apply(hilbertBasis dualCone coneFromVData transpose matrix rayList,
+      v -> flatten entries v);
+  assert(all(HB, h -> h#0 + h#1 - h#2 == 1));
+  L = QQ[t1,t2,t3];
+  S0 = QQ[y_1 .. y_(#HB)];
+  I0 = ker map(L, S0, apply(HB, h -> t1^(h#0) * t2^(h#1) * t3^(h#2)));
+
+  S = QQ[y_1 .. y_(#HB), w];
+  R = S/sub(I0, S);
+  assert(dim R - 1 == 3);
+  assert(radical ideal singularLocus R == ideal take(gens S, #HB));
+
+  P = computeFlip(R, Multipliers => {1}, Verbose => false);
+  assert(geometricDimension P == 3);
+  assert(#(P#fiberVariables) == 2);
+
+  -- the exceptional locus is a curve sitting over the vertex
+  A = P#ambientRing;
+  us = P#fiberVariables;
+  xs = P#baseVariables;
+  assert(dim(A/(P#definingIdeal + ideal take(xs, #HB))) - 2 == 1);
+
+  -- Z_proj is smooth
+  charts = select(flatten apply(us, u -> apply(xs, x -> (
+      Q := A/(P#definingIdeal + ideal(u - 1, x - 1));
+      if dim Q < 0 then null else {dim Q, dim singularLocus Q == -1}))),
+      c -> c =!= null);
+  assert(all(charts, c -> c#0 == 3 and c#1));
+
+  -- and on D_+(w) it is exactly the affine flip
+  Paff = computeFlip(S0/I0, BaseIsProjective => false, Multipliers => {1},
+      Verbose => false);
+  phi = map(A, Paff#ambientRing, us | take(xs, #HB));
+  assert(trim (P#definingIdeal + ideal(last xs - 1))
+      == trim (phi(Paff#definingIdeal) + ideal(last xs - 1)));
+///
+
 -- A flip that needs m > 1: the cone on v1 = (1,0,0), v2 = (0,1,0), v3 = (0,0,1),
 -- v4 = (1,3,-2), with circuit relation v1 + 3 v2 = 2 v3 + v4.  Here it is the
 -- triangulation {v1,v2,v3}, {v1,v2,v4} that carries the pi-ample canonical

@@ -39,6 +39,9 @@ M2 --script examples/toric-flip-index-two.m2
 threefold given by the cone on `(1,0,0)`, `(0,1,0)`, `(0,0,1)`, `(1,1,-2)`, which
 is not Q-Gorenstein. `examples/toric-flip-index-two.m2` replaces the last ray by
 `(1,3,-2)`, which makes the flip singular of index two and needs `m = 2`.
+`examples/toric-flip-projective.m2` redoes the first one in the projective
+setting of the paper and checks that it restricts to the affine answer.
+
 Besides the paper's projective setting the package also accepts an affine base
 (`BaseIsProjective => false`), which is what makes such local computations
 cheap.
