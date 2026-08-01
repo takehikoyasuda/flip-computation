@@ -61,4 +61,4 @@ See `docs/implementation-notes.md` for the correspondence with the paper and
 
 ## License
 
-To be decided before the repository is made public.
+CC0 1.0 Universal (public domain dedication). See [LICENSE](LICENSE).
