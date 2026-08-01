@@ -126,6 +126,41 @@ Description
 
 doc ///
 Key
+  canonicalIdeal
+  (canonicalIdeal, Ring)
+Headline
+  the canonical module embedded in R as an ideal of least degree
+Usage
+  I = canonicalIdeal R
+Inputs
+  R:Ring
+Outputs
+  I:Ideal
+    an ideal of $R$ isomorphic to $\omega_R$
+Description
+  Text
+    Steps 2 and 3 of Algorithm 3 together amount to embedding $\omega_X$ into
+    $R$ as an ideal: the ideal $I = \mathcal{O}_X(K_X - \operatorname{div}(s))$
+    of Step 3 is isomorphic to $\omega_X$, and every ideal isomorphic to
+    $\omega_X$ arises this way. Rather than choosing $s$ and then forming the
+    ideal, this takes a nonzero homomorphism $\omega_X \to R$ of least degree,
+    that is a minimal-degree generator of $\operatorname{Hom}(\omega_X, R)$, and
+    returns its image.
+
+    It matters which one is used. The $s$ that @TO antiCanonicalSection@
+    produces depends on which representative of the canonical class the
+    {\tt Divisor} package returns, and that depends on the grading. On the
+    threefold of {\tt examples/toric-flip-projective.m2}, graded by
+    $(2,2,1)$, that route gives $s = y_3^{11}$ and an $I^{(1)}$ in degree 30,
+    which does not finish; the least-degree embedding gives generators of degree
+    2 and takes a twentieth of a second.
+SeeAlso
+  antiCanonicalSection
+  flipDivisorData
+///
+
+doc ///
+Key
   isSmallProjection
   (isSmallProjection, B2MProjection)
 Headline

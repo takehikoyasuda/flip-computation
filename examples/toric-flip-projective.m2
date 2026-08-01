@@ -61,9 +61,7 @@ P = computeFlip R;
 
 -- the affine computation of examples/toric-flip.m2
 Paff = computeFlip(Raff, BaseIsProjective => false, Verbose => false);
-<< "affine I was " << Paff#blownUpIdeal << endl;
-<< "the two differ by the principal factor y_1^2, which does not change the"
-   << endl << "blowup: Bl_{fJ} X = Bl_J X for f a nonzerodivisor." << endl;
+<< "affine I was " << Paff#blownUpIdeal << ", the same ideal" << endl;
 
 A = P#ambientRing;
 us = P#fiberVariables;

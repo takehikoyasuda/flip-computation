@@ -28,18 +28,53 @@ antiCanonicalSection (Ring, List) := o -> (R, Kdata) -> (
     cands#(minPosition apply(cands, g -> (degree g)#0))
     )
 
--- Step 3.  With E := div(s) - K_X, which is effective by the choice of s, the
--- ideal sheaf O_X(K_X - div(s)) = O_X(-E) is represented by the divisorial ideal
--- of E.  Returns the pair (s, {{p_i, e_i}, ...}) describing E.
+-- Steps 2 and 3 together amount to embedding omega_X into R as an ideal: the
+-- ideal I = O_X(K_X - div(s)) of Step 3 is isomorphic to omega_X, and every
+-- ideal isomorphic to omega_X arises this way.  So instead of choosing s and
+-- then forming the ideal, look directly for the embedding of least degree, that
+-- is for a nonzero homomorphism omega_X --> R of least degree.
+--
+-- This matters a great deal.  The element s produced by antiCanonicalSection is
+-- at the mercy of which representative of the canonical class the Divisor
+-- package happens to return, and that depends on the grading: on the threefold
+-- of examples/toric-flip-projective.m2 the representative has a coefficient of
+-- 11 once the ring is graded by (2,2,1), the least s in prod p_i^n_i then has
+-- degree 22, and I^(1) lands in degree 30.  The embedding of least degree gives
+-- generators of degree 2 instead, and the whole computation drops from
+-- "unfinished after seventeen minutes" to a twentieth of a second.
+canonicalIdeal = method()
+canonicalIdeal Ring := R -> (
+    S := ambient R;
+    dl := apply(first entries vars S, q -> (degree q)#0);
+    om := (Ext^(dim S - dim R)(S^1/(ideal R), S^{-(sum dl)})) ** R;
+    H := Hom(om, R^1);
+    if numgens H == 0 then error(
+        "canonicalIdeal: the canonical module does not embed into R");
+    ds := apply(numgens H, i -> (degrees H)#i#0);
+    trim ideal matrix homomorphism H_{minPosition ds}
+    )
+
+-- Step 3.  E is the divisor with I = O_X(-E); it is effective because I is an
+-- ideal of R, and -E is linearly equivalent to K_X because I is isomorphic to
+-- omega_X.  Returns the pair (s, {{p_i, e_i}, ...}) describing E, where s is the
+-- section used if one was, and null when the embedding route was taken.
 flipDivisorData = method(Options => {Section => null, BaseIsProjective => true})
 flipDivisorData Ring := o -> R -> (
-    K := canonicalDivisor(R, IsGraded => o.BaseIsProjective);
-    Kdata := select(apply(primes K, p -> {p, coefficient(p, K)}), pn -> pn#1 != 0);
-    s := if o.Section === null
-        then antiCanonicalSection(R, Kdata, BaseIsProjective => o.BaseIsProjective)
-        else o.Section;
-    E := if s == 1_R then -K else divisor(s) - K;
+    local E;
+    s := o.Section;
+    if s === null then (
+        I := canonicalIdeal R;
+        if I == ideal 1_R then error(
+            "flipDivisorData: omega_X is free, so K_X is linearly trivial and "
+            | "there is no flip to compute (this is a flop)");
+        E = divisor I;
+        ) else (
+        K := canonicalDivisor(R, IsGraded => o.BaseIsProjective);
+        E = if s == 1_R then -K else divisor(s) - K;
+        );
     Edata := select(apply(primes E, p -> {p, coefficient(p, E)}), pe -> pe#1 != 0);
+    if #Edata == 0 then error(
+        "flipDivisorData: E is zero, so there is no flip to compute");
     if any(Edata, pe -> pe#1 < 0) then error(
         "flipDivisorData: div(s) - K_X is not effective; supply a different Section");
     (s, Edata)

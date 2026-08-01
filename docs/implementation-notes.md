@@ -14,7 +14,7 @@ How the code relates to arXiv:2603.13703, and where it deviates.
 | Lemma 2.6, B2M → graph | `b2mToGraphMorphism` (`segre.m2`) |
 | Section 3, canonical divisor | `canonicalDivisorData` (`divisors.m2`), via `Divisor::canonicalDivisor` |
 | Alg. 3, Step 1 | `canonicalDivisorData` |
-| Alg. 3, Step 2 | `antiCanonicalSection` |
+| Alg. 3, Step 2 | `antiCanonicalSection`, but see "Choice of s" below |
 | Alg. 3, Step 3 | `flipDivisorData`, `divisorialIdeal` |
 | Alg. 3, Steps 4–5 | `computeFlip` (`flip.m2`), `bigradedReesProjection` (`rees.m2`) |
 | Lemma 7.2, normality | `isNormalSource` |
@@ -54,10 +54,30 @@ of `Exc(pi)` must be a codimension-one irreducible component of `V(J O_Z)` that
 is contracted by `pi`, and `isSmallProjection` looks exactly for those. Components
 containing the irrelevant ideal are discarded, as they define the empty set.
 
-**Choice of s.** Any `s` in `prod p_i^max(0,n_i)` works in theory (Lemma 7.1
-only needs `m` sufficiently factorial), but different choices of `s` change `I`
-and hence how large `m` has to be. `antiCanonicalSection` picks a generator of
-least degree; a different one can be supplied with the option `Section`.
+**Choice of s.** Steps 2 and 3 together amount to embedding `omega_X` into `R`
+as an ideal: the ideal `I = O_X(K_X - div(s))` of Step 3 is isomorphic to
+`omega_X`, and every ideal isomorphic to `omega_X` arises this way. Rather than
+choosing `s` and then forming the ideal, `flipDivisorData` looks directly for
+the embedding of least degree — a nonzero homomorphism `omega_X -> R` of least
+degree, which `canonicalIdeal` computes as a minimal-degree generator of
+`Hom(omega_X, R)`. Passing `Section => s` uses the paper's construction instead;
+`antiCanonicalSection` still implements it.
+
+This is not a micro-optimisation. The `s` that `antiCanonicalSection` produces
+depends on which representative of the canonical class the `Divisor` package
+happens to return, and that depends on the grading:
+
+| threefold of `examples/toric-flip-projective.m2` | via `s` | via `canonicalIdeal` |
+| --- | --- | --- |
+| graded by `l = (1,1,-1)` | `s = 1`, `I` in degree 3 | `I` in degree 1 |
+| graded by `l = (2,2,1)` | `s = y_3^11`, `I` in degree 30 | `I` in degree 2 |
+
+and in the second row the loop went from "unfinished after seventeen minutes" to
+0.05 seconds. The two gradings describe the same threefold, so all of that cost
+was an artefact of the choice of `s`.
+
+The remaining freedom — which of several minimal-degree embeddings to take —
+still changes `I` and hence how large `m` has to be, and is not yet explored.
 
 **Schedule of m.** The paper runs over `m = 1!, 2!, 3!, ...`. `computeFlip` does
 the same up to `MaxSteps` (default 4, i.e. `m` up to 24), and the option
@@ -104,7 +124,7 @@ computation confirms:
 
 * `canonicalDivisorData` returns `-D_1 - D_3`, which differs from the
   torus-invariant `-sum D_i` by the principal divisor `div(y_1) = D_2 + D_4`.
-* `s = 1`, `E = D_1 + D_3`, and `I = O_X(-E)` has exactly two generators, so
+* `E = D_1 + D_3`, and `I = O_X(-E) = (y_5, y_4)` has exactly two generators, so
   `Z` lands in `P^1 x X` — one homogeneous coordinate per maximal cone of `Z`.
 * **`m = 1` already works**: `Z^1` is normal and the projection is small.
 * The fibre over the torus fixed point is one-dimensional, so the exceptional
@@ -139,28 +159,18 @@ want to flip. Retriangulating `sigma` leaves all six cones smooth, so the flip
 is a smooth projective toric threefold.
 
 What the computation confirms: `m = 1` again suffices; `I` comes out as
-`(y_1^2 y_5, y_1^2 y_4)`, which is the affine `(y_5, y_4)` times a principal
-factor coming from the choice of representative of `K_X` and therefore defines
-the same blowup; the fibre over the vertex is a curve; all twelve nonempty
-charts of `Z_proj` are smooth of dimension three; and **restricted to `D_+(w)`
-the answer is literally the affine flip**.
+`(y_5, y_4)`, the same ideal as over the affine base; the fibre over the vertex
+is a curve; all twelve nonempty charts of `Z_proj` are smooth of dimension
+three; and **restricted to `D_+(w)` the answer is literally the affine flip**.
 
-### Two things this example did *not* exercise
+### What this example still does not exercise
 
-**`singleDegreeIdeal` still does nothing.** It exists because the paper's
-bigrading makes the Rees relations bihomogeneous only when the generators of
-`I^(m)` share a degree, and it replaces `I^(m)` by its top-degree part when they
-do not. In every example in the repository the generators already have equal
-degrees — here `y_1^2 y_5` and `y_1^2 y_4` are both of degree 3 — so the
-replacement has never been observed to do anything. It remains untested.
-
-**Weighted gradings are impractical so far.** Grading the same ring by
-`l = (2,2,1)` instead, so that the Hilbert basis has degrees `2,5,2,5,5` and
-`X_proj` sits in a weighted projective space, makes `antiCanonicalSection`
-return `s = y_3^11` rather than `s = 1`. `I^(1)` then lands in degree 30, and
-`computeFlip` did not finish in seventeen minutes. The cost is driven entirely
-by the choice of `s`, which is the point of the "choice of s" item in the
-roadmap: with `l = (1,1,-1)` the same threefold takes 1.5 seconds.
+**`singleDegreeIdeal` does nothing.** It exists because the paper's bigrading
+makes the Rees relations bihomogeneous only when the generators of `I^(m)` share
+a degree, and it replaces `I^(m)` by its top-degree part when they do not. In
+every example in the repository the generators already have equal degrees, so
+the replacement has never been observed to do anything. It remains untested, and
+an `I^(m)` whose generators have genuinely different degrees is still wanted.
 
 `examples/toric-flip-index-two.m2` does the same for `v4 = (1,3,-2)`, circuit
 relation `v1 + 3 v2 = 2 v3 + v4`. The sign of `K.C` now comes out the other way

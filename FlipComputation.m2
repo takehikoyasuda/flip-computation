@@ -39,6 +39,7 @@ export {
     -- Section 7, Steps 1--3
     "canonicalDivisorData",
     "antiCanonicalSection",
+    "canonicalIdeal",
     "flipDivisorData",
     "divisorialIdeal",
     -- Section 7, Steps 4--5
@@ -264,6 +265,35 @@ TEST ///
   phi = map(A, Paff#ambientRing, us | take(xs, #HB));
   assert(trim (P#definingIdeal + ideal(last xs - 1))
       == trim (phi(Paff#definingIdeal) + ideal(last xs - 1)));
+///
+
+-- The same threefold over a weighted projective base.  Grading by l = (2,2,1)
+-- gives the Hilbert basis degrees 2,5,2,5,5; the canonical class then has a
+-- representative with a coefficient of 11, antiCanonicalSection returns
+-- s = y_3^11 and I^(1) lands in degree 30, which is hopeless.  Embedding
+-- omega_X by a map of least degree gives generators of degree 2 instead.
+TEST ///
+  rayList = {{1,0,0}, {0,1,0}, {0,0,1}, {1,1,-2}};
+  HB = apply(hilbertBasis dualCone coneFromVData transpose matrix rayList,
+      v -> flatten entries v);
+  ell = {2,2,1};
+  degs = apply(HB, h -> sum apply(3, k -> h#k * ell#k));
+  assert(degs == {2,5,2,5,5});
+  L = QQ[t1,t2,t3];
+  S0 = QQ[y_1 .. y_(#HB), Degrees => degs];
+  I0 = ker map(L, S0, apply(HB, h -> t1^(h#0) * t2^(h#1) * t3^(h#2)));
+  S = QQ[y_1 .. y_(#HB), w, Degrees => degs | {1}];
+  R = S/sub(I0, S);
+  assert(dim R - 1 == 3);
+
+  -- the paper's Step 2 is what is expensive here
+  assert((degree antiCanonicalSection R)#0 == 22);
+  -- the embedding of least degree is not
+  assert(sort flatten degrees canonicalIdeal R == {2,2});
+
+  P = computeFlip(R, Multipliers => {1}, Verbose => false);
+  assert(geometricDimension P == 3);
+  assert(#(P#fiberVariables) == 2);
 ///
 
 -- A flip that needs m > 1: the cone on v1 = (1,0,0), v2 = (0,1,0), v3 = (0,0,1),

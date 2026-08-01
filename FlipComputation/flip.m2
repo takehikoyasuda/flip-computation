@@ -20,8 +20,10 @@ computeFlip Ring := o -> R -> (
     (s, Edata) := flipDivisorData(R,
         Section => o.Section, BaseIsProjective => o.BaseIsProjective);
     if o.Verbose then (
-        << "-- s = " << s << endl;
-        << "-- E = div(s) - K_X has " << #Edata << " component(s) with multiplicities "
+        if s === null
+        then << "-- I = omega_X, embedded in R by a map of least degree" << endl
+        else << "-- s = " << s << endl;
+        << "-- E has " << #Edata << " component(s) with multiplicities "
            << toString apply(Edata, pe -> pe#1) << endl;
         );
     ms := if o.Multipliers === null
