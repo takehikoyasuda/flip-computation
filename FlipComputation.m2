@@ -48,6 +48,7 @@ export {
     "bigradedReesProjection",
     "isSmallProjection",
     "isNormalSource",
+    "isS2Source",
     "computeFlip",
     -- options
     "Section",
@@ -140,6 +141,26 @@ TEST ///
   assert(not isSmallProjection Q);
 ///
 
+-- On a small projection R1 comes for free, so normality reduces to S2.  Check
+-- the cheap test against the full one where the full one is still affordable.
+TEST ///
+  R = QQ[x0,x1,x2,x3]/ideal(x0*x1-x2*x3);
+  P = bigradedReesProjection(ideal(x0,x2), BaseIsProjective => false);
+  assert(isSmallProjection P);
+  assert(isS2Source P);
+  assert(isS2Source P == isNormalSource P);
+
+  S = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+  Q = bigradedReesProjection ideal(x0,x2);
+  assert(isSmallProjection Q);
+  assert(isS2Source Q == isNormalSource Q);
+
+  -- a weighted projective base falls back to the cone test
+  W = QQ[w0,w1,w2,w3, Degrees => {1,1,1,2}];
+  V = bigradedReesProjection ideal(w0,w1);
+  assert(isS2Source V);
+///
+
 -- A genuine flip: the non-Q-Gorenstein toric threefold given by the cone on
 -- v1 = (1,0,0), v2 = (0,1,0), v3 = (0,0,1), v4 = (1,1,-2), whose circuit
 -- relation is v1 + v2 = 2 v3 + v4.  See examples/toric-flip.m2.
@@ -191,6 +212,60 @@ TEST ///
 
   -- K.C > 0 on the wall curve, so K_Z is pi-ample: this is the flip, not the
   -- flipping contraction it came from.
+  rayset = C -> entries transpose rays C;
+  wallRays = rayset intersection(taus#0, taus#1);
+  outside = apply(taus, T -> first select(rayset T, v -> not member(v, wallRays)));
+  rel = flatten entries gens ker transpose matrix (outside | wallRays);
+  if rel#0 < 0 then rel = apply(rel, c -> -c);
+  assert(-(sum rel) > 0);
+///
+
+-- A flip that needs m > 1: the cone on v1 = (1,0,0), v2 = (0,1,0), v3 = (0,0,1),
+-- v4 = (1,3,-2), with circuit relation v1 + 3 v2 = 2 v3 + v4.  Here it is the
+-- triangulation {v1,v2,v3}, {v1,v2,v4} that carries the pi-ample canonical
+-- class, and it is singular: K_Z has index two, and m = 1 does not suffice.
+-- See examples/toric-flip-index-two.m2.
+TEST ///
+  rayList = {{1,0,0}, {0,1,0}, {0,0,1}, {1,3,-2}};
+  sigma = coneFromVData transpose matrix rayList;
+  HB = apply(hilbertBasis dualCone sigma, v -> flatten entries v);
+  L = QQ[t1,t2,t3];
+  S = QQ[y_1 .. y_(#HB)];
+  mono = h -> t1^(h#0) * t2^(h#1) * t3^(h#2);
+  R = S/ker map(L, S, apply(HB, mono));
+  assert(dim R == 3);
+
+  -- m = 1 is rejected: the exceptional locus contains a divisor.
+  (s, Edata) = flipDivisorData(R, BaseIsProjective => false);
+  P1 = bigradedReesProjection(divisorialIdeal(Edata, 1), BaseIsProjective => false);
+  assert(#(P1#fiberVariables) == 3);
+  assert(not isSmallProjection P1);
+
+  -- m = 2 gives the flip.
+  P = computeFlip(R, BaseIsProjective => false, Multipliers => {1,2}, Verbose => false);
+  assert(geometricDimension P == 3);
+  assert(#(P#fiberVariables) == 2);
+  assert(dim((P#ambientRing)/(P#definingIdeal + ideal P#baseVariables)) - 1 == 1);
+
+  -- The fan of Z is {v1,v2,v3}, {v1,v2,v4}; one chart is A^3 and the other is
+  -- the quotient singularity of index two.
+  A = P#ambientRing;
+  r = #(P#fiberVariables);
+  toLattice = map(L, A, apply(r, i -> 1_L) | apply(HB, mono));
+  gexp = apply(first entries gens P#blownUpIdeal, g -> first exponents toLattice g);
+  taus = apply(#gexp, i -> intersection(sigma, coneFromHData matrix apply(
+          select(toList(0 .. #gexp-1), j -> j != i),
+          j -> apply(3, k -> gexp#j#k - gexp#i#k))));
+  expected = {{0,1,2}, {0,1,3}} / (ix ->
+      coneFromVData transpose matrix apply(ix, j -> rayList#j));
+  assert(#taus == 2 and all(taus, T -> any(expected, U -> T == U)));
+  charts = apply(P#fiberVariables, v -> (
+      Q := A/(P#definingIdeal + ideal(v - 1));
+      {dim Q, dim singularLocus Q == -1}));
+  assert(all(charts, c -> c#0 == 3));
+  assert(#select(charts, c -> c#1) == 1);
+
+  -- K.C > 0 on the wall curve, so K_Z is pi-ample.
   rayset = C -> entries transpose rays C;
   wallRays = rayset intersection(taus#0, taus#1);
   outside = apply(taus, T -> first select(rayset T, v -> not member(v, wallRays)));

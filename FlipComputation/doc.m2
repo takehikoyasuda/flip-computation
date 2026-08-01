@@ -53,13 +53,18 @@ Description
 
     With {\tt BaseIsProjective => false} the same algorithm is run over
     $X = \operatorname{Spec} R$; see @TO BaseIsProjective@.
+
+    The two conditions are tested in the order "exceptional locus, then
+    normality", and normality is tested as $S_2$ alone: a small projection
+    satisfies $R_1$ automatically, see @TO isS2Source@.
 Caveat
-  The normality test is applied to the bihomogeneous coordinate ring, that is, to
+  The $S_2$ test is applied to the bihomogeneous coordinate ring, that is, to
   the affine cone over $Z^m$; this is sufficient but not necessary for $Z^m$
-  itself to be normal.
+  itself to be $S_2$.
 SeeAlso
   BaseIsProjective
   bigradedReesProjection
+  isS2Source
   isSmallProjection
   isNormalSource
 ///
@@ -139,6 +144,57 @@ Description
     birational, Zariski's main theorem shows that any divisorial component of the
     exceptional locus is an irreducible component of $V(J\mathcal{O}_Z)$ of
     codimension one that is contracted.  The test looks for such components.
+///
+
+doc ///
+Key
+  isS2Source
+  (isS2Source, B2MProjection)
+Headline
+  test Serre's condition S2 on the source
+Usage
+  isS2Source P
+Inputs
+  P:B2MProjection
+Outputs
+  :Boolean
+Description
+  Text
+    For a {\em small} projection this is all that has to be checked in order to
+    know that $Z$ is normal. A point $z$ of $Z$ of codimension one cannot lie in
+    $\operatorname{Exc}(\pi)$, which has codimension at least two, so $\pi$ is a
+    local isomorphism at $z$ and $\mathcal{O}_{Z,z}$ is the local ring of $X$ at
+    a point of codimension one, hence a discrete valuation ring. A small
+    projection therefore satisfies $R_1$ for free.
+
+    The criterion {\tt isNormal} uses for its own $S_2$ half is that
+    $\operatorname{codim}\operatorname{Ext}^j(A,S) \ge j+2$ for every
+    $j > \operatorname{codim} I$; the locus where it fails is the union over $j$
+    of the components of $\operatorname{Supp}\operatorname{Ext}^j$ of
+    codimension at most $j+1$. Since $Z$ is covered by the primes of $A$ that do
+    not contain the irrelevant ideal, $Z$ satisfies $S_2$ exactly when every
+    such bad component lies in the irrelevant locus. That is the same step as in
+    @TO isSmallProjection@, and it needs neither an affine cover nor a Veronese
+    computation.
+
+    Applying the criterion to the whole of $\operatorname{Spec} A$ instead --
+    that is, asking the cone to be $S_2$ -- is strictly more than Lemma 7.2 asks
+    for, because the vertex locus
+    $V(A_+) \cong \operatorname{Spec} R$ has codimension one in
+    $\operatorname{Spec} A$.
+Caveat
+  On its own this does not say that $Z$ is normal: it has to be combined with
+  @TO isSmallProjection@.
+
+  Identifying $S_2$ for $A$ at a relevant prime with $S_2$ for $Z$ uses
+  $A_f = A_{(f)}[f,f^{-1}]$, which needs $f$ of degree one. The fiber variables
+  always have degree one, so the test is exact over an affine base and over a
+  projective base with the standard grading. Over a {\em weighted} projective
+  base it falls back to $S_2$ for the whole cone, which is sufficient but not
+  necessary.
+SeeAlso
+  isNormalSource
+  isSmallProjection
 ///
 
 doc ///

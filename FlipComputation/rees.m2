@@ -103,13 +103,59 @@ bigradedReesProjection Ideal := o -> J -> (
 b2mProjection = method()
 b2mProjection HashTable := H -> new B2MProjection from H
 
--- Normality of Z (the first condition of Lemma 7.2).
+-- Normality of Z (the first condition of Lemma 7.2), in two versions.
 --
--- We test normality of the bihomogeneous coordinate ring, i.e. of the affine
--- cone over Z, which is a sufficient but not necessary condition for Z itself to
--- be normal.
+-- The full test asks the bihomogeneous coordinate ring, i.e. the affine cone
+-- over Z, to be normal.  That is sufficient but not necessary for Z itself to be
+-- normal, and it is expensive: isNormal checks S2 and then R1, and the R1 half
+-- goes through minors(codim I, jacobian), which explodes.
 isNormalSource = method()
 isNormalSource B2MProjection := P -> isNormal(P#totalRing)
+
+-- Serre's condition S2 for Z.
+--
+-- Once the projection is known to be small this is all that has to be checked.
+-- A point z of Z of codimension one does not lie in Exc(pi), because that has
+-- codimension at least two, so pi is a local isomorphism at z and O_{Z,z} is the
+-- local ring of X at a point of codimension one, hence a discrete valuation ring.
+-- A small projection therefore has R1 for free, and normality reduces to S2.
+--
+-- The criterion isNormal uses for its own S2 half is: A = S/I is S2 when
+-- codim Ext^j(A,S) >= j+2 for every j > codim I.  The locus where it fails is
+-- the union over j of the components of Supp Ext^j of codimension at most j+1.
+-- Z is covered by the primes of A that do not contain the irrelevant ideal, so
+-- Z is S2 exactly when every such bad component lies in the irrelevant locus --
+-- the same "discard the components that define the empty set" step as in
+-- isSmallProjection, and it needs neither charts nor a Veronese computation.
+--
+-- Applying the criterion on the whole of Spec A instead would also cover the
+-- primes containing the irrelevant ideal, which is strictly more than Lemma 7.2
+-- asks for: the vertex locus V(A_+) is isomorphic to Spec R and has codimension
+-- one in Spec A, so requiring S2 there can reject an m that in fact works.
+--
+-- Identifying S2 for A at a relevant prime with S2 for Z at the corresponding
+-- point uses A_f = A_(f)[f,f^{-1}], which needs f of degree one.  The fiber
+-- variables always have degree one; over a weighted projective base the base
+-- variables need not, and there we fall back to S2 for the whole cone, which is
+-- sufficient but not necessary.
+isS2Source = method()
+isS2Source B2MProjection := P -> (
+    A := P#ambientRing;
+    I := P#definingIdeal;
+    n := codim I;
+    M := cokernel generators I;
+    js := toList(n+1 .. (dim A) - 1);
+    exact := (not isProjectiveBase P)
+        or all(P#baseVariables, v -> (degree v)#1 == 1);
+    if not exact then all(js, j -> codim Ext^j(M, A) >= j+2)
+    else (
+        irr := P#irrelevantIdeal;
+        all(js, j -> (
+            E := Ext^j(M, A);
+            E == 0 or all(minimalPrimes ann E,
+                q -> codim q >= j+2 or isSubset(irr, q))))
+        )
+    )
 
 -- Codimension of the exceptional locus (the second condition of Lemma 7.2).
 --

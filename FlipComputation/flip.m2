@@ -33,12 +33,16 @@ computeFlip Ring := o -> R -> (
         P := bigradedReesProjection(Im, BaseIsProjective => o.BaseIsProjective);
         if o.Verbose then << "--   Z^m sits in P^" << #(P#fiberVariables) - 1
             << " x X, dim Z^m = " << geometricDimension P << endl;
-        if not isNormalSource P then (
-            if o.Verbose then << "--   Z^m is not normal" << endl;
-            continue;
-            );
+        -- The exceptional locus is tested first, and not only because it is the
+        -- cheaper of the two conditions: a small projection is automatically R1,
+        -- so once it has passed, normality of Z^m reduces to S2 (see isS2Source).
+        -- That turns the normality test from minutes into milliseconds.
         if not isSmallProjection(P, Verbose => o.Verbose) then (
             if o.Verbose then << "--   exceptional locus contains a divisor" << endl;
+            continue;
+            );
+        if not isS2Source P then (
+            if o.Verbose then << "--   Z^m is not S2, hence not normal" << endl;
             continue;
             );
         if o.Verbose then << "-- the flip is obtained for m = " << m << endl;

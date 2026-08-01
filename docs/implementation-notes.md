@@ -39,11 +39,11 @@ not the blowup, and it puts `Z^m` inside `P^{r-1} x X` as in Step 5. The
 elimination that computes the Rees ideal is carried out with `deg t = (1,-D)`,
 so it stays homogeneous.
 
-**Normality test.** `isNormalSource` tests normality of the bihomogeneous
-coordinate ring, i.e. of the affine cone over `Z^m`. That is sufficient but not
-necessary for `Z^m` to be normal, so the loop over `m` may skip an `m` for which
-`Z^m` is in fact already the flip. A chart-by-chart test is the natural
-refinement.
+**Normality test.** `computeFlip` tests the two conditions of Lemma 7.2 in the
+order "exceptional locus, then normality", and tests normality as `S2` alone
+(`isS2Source`). See "Normality is only S2" below. `isNormalSource`, the full
+test on the affine cone over `Z^m`, is still exported but no longer used by the
+algorithm.
 
 **Exceptional locus.** `Exc(pi)` is contained in `V(J O_Z)`, because the blowup
 of `J` is an isomorphism wherever `J` is invertible. Since `X` is normal and
@@ -115,6 +115,104 @@ computation confirms:
 
 The last two points are the real check, and they are what the regression test at
 the bottom of `FlipComputation.m2` asserts.
+
+### A case where m = 1 is not enough
+
+`examples/toric-flip-index-two.m2` does the same for `v4 = (1,3,-2)`, circuit
+relation `v1 + 3 v2 = 2 v3 + v4`. The sign of `K.C` now comes out the other way
+round,
+
+    T_+ : <v2,v3,v4>, <v1,v3,v4>   wall <v3,v4>,  K.C = -(1+3-2-1) = -1
+    T_- : <v1,v2,v3>, <v1,v2,v4>   wall <v1,v2>,  K.C = -(2+1-1-3) = +1
+
+so the flip is `Z = T_-`, and this time it is singular: `<v1,v2,v4>` has
+determinant `-2`, and `m.v1 = m.v2 = m.v4 = 1` would need `m = (1,1,3/2)`, so
+`K_Z` is 2-Cartier but not Cartier. Correspondingly
+
+* `m = 1` is **rejected**: `I = O_X(-D_1)` has three generators, and the blowup
+  of `I` has a divisorial component in its exceptional locus (it is normal, so
+  it is the smallness test that rejects it);
+* `m = 2` gives the flip, with `I^(2) = (y_6, y_4^2)` — two generators, one per
+  maximal cone of `Z`.
+
+This is the first example in which the loop over `m` in Step 4 actually
+iterates. The index of `K_Z` being 2 is the obvious explanation for why an even
+`m` is needed, and is a data point for the question of whether a lower bound on
+`m` can be read off from the singularity instead of trying `1!, 2!, 3!, ...`.
+
+## Normality is only S2
+
+Both conditions of Lemma 7.2 are required, so testing them in either order gives
+the same answer. But the order matters for more than speed.
+
+**A small projection is R1 for free.** Let `z` be a point of `Z` of codimension
+one. Since `Exc(pi)` has codimension at least two, `z` is not in it, so `pi` is
+a local isomorphism at `z` and `O_{Z,z}` is the local ring of `X` at a point of
+codimension one — a discrete valuation ring, because `X` is normal. So `Z` is
+regular in codimension one as soon as the projection is small, and normality of
+`Z` reduces to `S2`.
+
+`isS2Source` therefore tests only the `S2` half of Serre's criterion, and
+`computeFlip` runs `isSmallProjection` first so that the reduction applies.
+
+**S2 for `Z`, not for the cone.** The criterion `isNormal` uses internally is
+that `codim Ext^j(A,S) >= j+2` for every `j > codim I`, and the locus where it
+fails is the union over `j` of the components of `Supp Ext^j` of codimension at
+most `j+1`. `Z` is covered by the primes of `A` that do not contain the
+irrelevant ideal, so `Z` is `S2` exactly when every such bad component lies in
+the irrelevant locus — the same step `isSmallProjection` already performs.
+
+Asking the whole cone to be `S2` would be strictly more than Lemma 7.2 needs,
+because the vertex locus `V(A_+) = Spec R` has codimension one in `Spec A`, and
+requiring `S2` there can reject an `m` that in fact works. Testing on `Z`
+removes that gap, and needs neither an affine cover nor a Veronese computation.
+
+The identification of `S2` for `A` at a relevant prime with `S2` for `Z` uses
+`A_f = A_(f)[f,f^{-1}]`, which needs `f` of degree one. The fiber variables
+always have degree one, so the test is exact over an affine base and over a
+projective base with the standard grading; over a weighted projective base
+`isS2Source` falls back to `S2` for the cone, which is sufficient but not
+necessary.
+
+### Measurements
+
+On the index-two example at `m = 1` (Rees algebra: 9 variables, 22 generators,
+`codim I = 5`), the two halves of `isNormal` are wildly asymmetric:
+
+| step | cpu time |
+| --- | --- |
+| `divisorialIdeal` | 0.0002 s |
+| `bigradedReesProjection` | 0.002 s |
+| `isSmallProjection` | 0.07 s |
+| S2 half of `isNormal` | 0.02 s |
+| R1 half (`minors(5, jacobian)`, 1 436 495 generators) | 119 s |
+| R1 half (`dim` of that ideal) | 13 s |
+| `isNormal` total | 133 s |
+
+Two refinements that look plausible and are not:
+
+* **Testing R1 first as a cheap filter.** R1 is the expensive half, not the
+  cheap one; `isNormal` already does S2 first for that reason.
+* **Testing normality chart by chart** rather than on the cone, as a way of
+  getting the exact condition on `Z^m`. Setting `u_i = 1` destroys homogeneity
+  and raises `codim` from 5 to 6, so the minors get worse: 362 s and 322 s for
+  the first two charts of the same example, against 133 s for the cone. (For
+  `S2` alone charts are affordable — 0.007 s to 0.09 s — but they are not needed
+  either, see above, and they do not handle weighted gradings.)
+
+Dropping R1 altogether is what actually works. The three `S2` variants on the
+same set of examples:
+
+| example | cone | charts | on `Z` |
+| --- | --- | --- | --- |
+| affine ODP | 0.0010 s | 0.0068 s | 0.0003 s |
+| toric `(1,1,-2)`, `m=1` | 0.0011 s | 0.0089 s | 0.0003 s |
+| toric `(1,3,-2)`, `m=2` | 0.0080 s | 0.0152 s | 0.0003 s |
+| toric `(1,3,-2)`, `m=1` | 0.0189 s | 0.0919 s | 0.0002 s |
+| projective ODP | 0.0012 s | 0.0493 s (10 charts) | 0.0004 s |
+
+All three agree on every example; no case is yet known where the cone test is
+strictly stronger in practice.
 
 ## Known limitations
 

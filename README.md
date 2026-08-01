@@ -32,13 +32,16 @@ or, from the repository root,
 ```
 M2 --script tests/run-tests.m2
 M2 --script examples/toric-flip.m2
+M2 --script examples/toric-flip-index-two.m2
 ```
 
 `examples/toric-flip.m2` computes a genuine three-dimensional flip: the toric
 threefold given by the cone on `(1,0,0)`, `(0,1,0)`, `(0,0,1)`, `(1,1,-2)`, which
-is not Q-Gorenstein. Besides the paper's projective setting the package also
-accepts an affine base (`BaseIsProjective => false`), which is what makes such a
-local computation cheap.
+is not Q-Gorenstein. `examples/toric-flip-index-two.m2` replaces the last ray by
+`(1,3,-2)`, which makes the flip singular of index two and needs `m = 2`.
+Besides the paper's projective setting the package also accepts an affine base
+(`BaseIsProjective => false`), which is what makes such local computations
+cheap.
 
 ## Layout
 
