@@ -18,16 +18,26 @@ Early development. The API is unstable.
 ## Requirements
 
 * Macaulay2 (tested with 1.24.05 and 1.24.11)
-* Bundled packages: `Divisor`, `SymbolicPowers`, `ReesAlgebra`, `Polyhedra`,
+* Bundled packages: `Divisor`, `SymbolicPowers`, `Polyhedra`,
   `IntegralClosure`, `MinimalPrimes`, `Elimination`
 
 ## Usage
 
+From the repository root, install the package and its documentation once,
+
 ```
-M2 -e 'needsPackage("FlipComputation", FileName => "FlipComputation.m2")'
+M2 -e 'installPackage "FlipComputation"'
 ```
 
-or, from the repository root,
+after which it is available from anywhere:
+
+```
+M2 -e 'needsPackage "FlipComputation"'
+M2 -e 'viewHelp FlipComputation'
+```
+
+The tests and the examples run against the sources in place and need no
+installation:
 
 ```
 M2 --script tests/run-tests.m2

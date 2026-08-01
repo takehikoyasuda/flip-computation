@@ -47,7 +47,7 @@ b2mToGraphMorphism B2MProjection := o -> P -> (
         | "the Segre construction of Lemma 2.3 does not apply");
     A := P#ambientRing;
     U := P#totalRing;
-    R := P#baseRing;
+    R := P#baseCoordinateRing;
     us := P#fiberVariables;
     xs := P#baseVariables;
     ds := apply(us, v -> (degree v)#0);
@@ -79,7 +79,7 @@ b2mToGraphMorphism B2MProjection := o -> P -> (
         definingIdeal => gI,
         totalRing => G/gI,
         sourceRing => W,
-        baseRing => R,
+        baseCoordinateRing => R,
         fiberVariables => zs,
         baseVariables => ys,
         irrelevantIdeal => bigradedIrrelevantIdeal(zs, ys)
@@ -87,5 +87,5 @@ b2mToGraphMorphism B2MProjection := o -> P -> (
     )
 
 -- The bihomogeneous ideal defining the graph.
-graphIdeal = method()
-graphIdeal GraphMorphism := G -> G#definingIdeal
+graphMorphismIdeal = method()
+graphMorphismIdeal GraphMorphism := G -> G#definingIdeal

@@ -103,7 +103,8 @@ as an ideal: the ideal `I = O_X(K_X - div(s))` of Step 3 is isomorphic to
 choosing `s` and then forming the ideal, `flipDivisorData` looks directly for
 the embedding of least degree — a nonzero homomorphism `omega_X -> R` of least
 degree, which `canonicalIdeal` computes as a minimal-degree generator of
-`Hom(omega_X, R)`. Passing `Section => s` uses the paper's construction instead;
+`Hom(omega_X, R)`. Passing `AntiCanonicalSection => s` uses the paper's
+construction instead;
 `antiCanonicalSection` still implements it.
 
 This is not a micro-optimisation. The `s` that `antiCanonicalSection` produces

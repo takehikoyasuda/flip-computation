@@ -6,7 +6,7 @@
 
 ## 1. 現状
 
-以下が動いている（テスト7件、`M2 --script tests/run-tests.m2` が約1秒で通過）。
+以下が動いている（テスト13件、`M2 --script tests/run-tests.m2` が約5秒で通過）。
 
 * `FlipComputation.m2` + `FlipComputation/{basics,divisors,rees,segre,flip,doc}.m2`
 * Algorithm 3 の Step 1–5 を実装（`computeFlip`）
@@ -248,7 +248,8 @@ X_proj = Proj k[y_1..y_5, w]/I  ⊂ P^5,  deg w = 1
    等しい（`I = O_X(K_X - div(s))` は ω_X と同型で、逆に ω_X と同型なイデアルは
    すべてこの形）。ならば s を経由せず、**最小次数の埋め込みを直接探せばよい**。
    `canonicalIdeal` を追加し、`Hom(ω_X, R)` の最小次数の生成元の像を取る。
-   `flipDivisorData` の既定をこちらにし、`Section => s` で論文どおりの経路も残した。
+   `flipDivisorData` の既定をこちらにし、`AntiCanonicalSection => s` で論文どおりの
+   経路も残した。
 
    | 同一の3-fold | s 経由 | `canonicalIdeal` |
    |---|---|---|
@@ -338,13 +339,28 @@ X_proj = Proj k[y_1..y_5, w]/I  ⊂ P^5,  deg w = 1
 
 * Algorithm 1（Stein 分解、5章）、Algorithm 2（contraction 射、6章）、
   Algorithm 4（MMP 全体、7章）。
-* public 化の準備: ライセンス選定（未定、README に明記済み）、GitHub Actions で
-  Macaulay2 のテストを回す CI、`installPackage` が通るドキュメント整備。
-  * **既知の不具合（今回の変更以前から存在）**: `installPackage` が
-    `can't convert symbol 'Section' to external string because it is shadowed by
-    'Section'` で失敗する。export しているオプション名 `Section` が `SimpleDoc`
-    側の `Section` と衝突している。`AntiCanonicalSection` などに改名すれば直る
-    見込み。`check`（= `tests/run-tests.m2`）は影響を受けないので通る。
+* public 化の準備。
+  * ~~ライセンス選定~~ **完了。CC0 1.0**（`SteinFactorizationM2` と同じ）。CC0 は
+    GPL 互換なので M2 本体（GPL-2+）と一緒に配布する上での支障はなく、逆向き
+    — GPL のコードを CC0 のプロジェクトに取り込む — はできないので、
+    Algorithm 1 の実装と将来合流させる余地を残すならこちらが有利。
+  * ~~`installPackage` が通らない~~ **完了。3つの名前衝突が原因だった。**
+    * `Section`（オプション名）が `SimpleDoc` の `Section` と衝突して**エラー**。
+      → `AntiCanonicalSection` に改名。
+    * `baseRing`（`B2MProjection` のキー）が Core の `baseRing` を隠して**警告**。
+      → `baseCoordinateRing` に改名。
+    * `graphIdeal` が Core の `graphIdeal(RingMap)` を隠して**警告**。
+      → `graphMorphismIdeal` に改名。
+
+      後の2つはエラーにならないが、`needsPackage` した利用者から M2 の標準関数が
+      見えなくなるので直した。改名後、警告は一つも出ない。
+  * **残: ドキュメント整備。** export 41 個のうち文書があるのは 10 個。
+    未文書 31 個の内訳はハッシュキー 12・オプション 5・中間関数 14 なので、
+    doc を 31 個書くより **export を絞る方が先**。`installPackage` は現状
+    「missing node: `computeFlip(...,MaxSteps=>...)` 」等の警告を出す
+    （オプションごとの doc ノードが無いため）。エラーではない。
+  * **残: CI。** GitHub Actions で `M2 --script tests/run-tests.m2`。
+    13 件・5 秒なので軽い。
 
 ## 6. 論文に照らして確認したい点
 

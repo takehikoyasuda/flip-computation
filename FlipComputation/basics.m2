@@ -56,7 +56,7 @@ bigradedDim = (P, q) -> dim((P#ambientRing)/q) - coneCorrection P
 -- Map k[y,x] --> R killing the fiber variables; used to restrict bihomogeneous
 -- ideals to the base (the ideal p|_R of Section 2.3).
 baseProjectionMap = P -> (
-    R := P#baseRing;
+    R := P#baseCoordinateRing;
     map(R, P#ambientRing, toList(#(P#fiberVariables) : 0_R) | gens R)
     )
 
@@ -69,6 +69,6 @@ restrictToBase (B2MProjection, Ideal) := (P, q) -> (
 
 -- Dimension of the image in X of the subvariety defined by q.
 imageDimension = (P, q) -> (
-    d := dim((P#baseRing)/(restrictToBase(P, q)));
+    d := dim((P#baseCoordinateRing)/(restrictToBase(P, q)));
     if isProjectiveBase P then d - 1 else d
     )

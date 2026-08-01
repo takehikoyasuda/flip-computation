@@ -58,10 +58,11 @@ canonicalIdeal Ring := R -> (
 -- ideal of R, and -E is linearly equivalent to K_X because I is isomorphic to
 -- omega_X.  Returns the pair (s, {{p_i, e_i}, ...}) describing E, where s is the
 -- section used if one was, and null when the embedding route was taken.
-flipDivisorData = method(Options => {Section => null, BaseIsProjective => true})
+flipDivisorData = method(Options => {
+        AntiCanonicalSection => null, BaseIsProjective => true})
 flipDivisorData Ring := o -> R -> (
     local E;
-    s := o.Section;
+    s := o.AntiCanonicalSection;
     if s === null then (
         I := canonicalIdeal R;
         if I == ideal 1_R then error(
@@ -76,7 +77,8 @@ flipDivisorData Ring := o -> R -> (
     if #Edata == 0 then error(
         "flipDivisorData: E is zero, so there is no flip to compute");
     if any(Edata, pe -> pe#1 < 0) then error(
-        "flipDivisorData: div(s) - K_X is not effective; supply a different Section");
+        "flipDivisorData: div(s) - K_X is not effective; "
+        | "supply a different AntiCanonicalSection");
     (s, Edata)
     )
 

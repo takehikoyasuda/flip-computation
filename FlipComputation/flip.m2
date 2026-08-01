@@ -34,7 +34,7 @@ multiplierSchedule ZZ := n -> (
     )
 
 computeFlip = method(Options => {
-        Section => null,
+        AntiCanonicalSection => null,
         Multipliers => null,
         MaxSteps => 4,
         ReturnGraph => false,
@@ -43,7 +43,8 @@ computeFlip = method(Options => {
         })
 computeFlip Ring := o -> R -> (
     (s, Edata) := flipDivisorData(R,
-        Section => o.Section, BaseIsProjective => o.BaseIsProjective);
+        AntiCanonicalSection => o.AntiCanonicalSection,
+        BaseIsProjective => o.BaseIsProjective);
     if o.Verbose then (
         if s === null
         then << "-- I = omega_X, embedded in R by a map of least degree" << endl

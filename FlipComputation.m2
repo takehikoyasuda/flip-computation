@@ -1,8 +1,8 @@
 -- -*- coding: utf-8 -*-
 newPackage(
     "FlipComputation",
-    Version => "0.1.0",
-    Date => "31 July 2026",
+    Version => "0.2.0",
+    Date => "1 August 2026",
     Authors => {{
         Name => "Takehiko Yasuda",
         Email => "yasuda.takehiko.sci@osaka-u.ac.jp"
@@ -32,7 +32,7 @@ export {
     "segreHilbertBasis",
     "segreProductRing",
     "b2mToGraphMorphism",
-    "graphIdeal",
+    "graphMorphismIdeal",
     "geometricDimension",
     "isProjectiveBase",
     "restrictToBase",
@@ -53,7 +53,7 @@ export {
     "multiplierSchedule",
     "computeFlip",
     -- options
-    "Section",
+    "AntiCanonicalSection",
     "Multipliers",
     "MaxSteps",
     "ReturnGraph",
@@ -64,7 +64,7 @@ export {
     "definingIdeal",
     "totalRing",
     "sourceRing",
-    "baseRing",
+    "baseCoordinateRing",
     "fiberVariables",
     "baseVariables",
     "baseIsProjective",
