@@ -155,10 +155,12 @@ TEST ///
   assert(isSmallProjection Q);
   assert(isS2Source Q == isNormalSource Q);
 
-  -- a weighted projective base falls back to the cone test
+  -- a weighted projective base takes the same code path; there the test is
+  -- sufficient rather than exact, but it is still implied by isNormalSource
   W = QQ[w0,w1,w2,w3, Degrees => {1,1,1,2}];
   V = bigradedReesProjection ideal(w0,w1);
   assert(isS2Source V);
+  assert(not isNormalSource V or isS2Source V);
 ///
 
 -- A genuine flip: the non-Q-Gorenstein toric threefold given by the cone on

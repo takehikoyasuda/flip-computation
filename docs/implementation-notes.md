@@ -167,12 +167,36 @@ because the vertex locus `V(A_+) = Spec R` has codimension one in `Spec A`, and
 requiring `S2` there can reject an `m` that in fact works. Testing on `Z`
 removes that gap, and needs neither an affine cover nor a Veronese computation.
 
-The identification of `S2` for `A` at a relevant prime with `S2` for `Z` uses
-`A_f = A_(f)[f,f^{-1}]`, which needs `f` of degree one. The fiber variables
-always have degree one, so the test is exact over an affine base and over a
-projective base with the standard grading; over a weighted projective base
-`isS2Source` falls back to `S2` for the cone, which is sufficient but not
-necessary.
+**Weights.** The weights in question are the `c_j` of `deg x_j = (0,c_j)`, that
+is, those of the weighted projective space the base `X = Proj R` sits in; the
+paper's Definition 2.2 allows weights `d_j` on the fiber variables too, though
+the Rees construction always produces `d_j = 1`. Passing to a Veronese would
+make any monograded variety standard-graded, but at a ruinous cost in the number
+of variables, which is presumably why the paper allows arbitrary weights in the
+first place.
+
+The test is *sufficient* whatever the weights: writing `B = A_f` for a relevant
+homogeneous `f`, `B` is finite over `B' = B_0[f,f^{-1}]` and `B'` is a direct
+summand of `B` as a `B'`-module, so `depth B' >= depth B` while the dimensions
+agree, and `B` being `S2` forces `B_0 = A_(f)` to be `S2`.
+
+It is *necessary* as well, hence exactly Lemma 7.2's condition, when every
+relevant variable has weight one: the torus then acts freely on
+`Spec A - V(irr)`, which becomes a torsor over `Z`, and `S2` travels both ways.
+That covers an affine base and a projective base with the standard grading.
+
+Over weighted gradings only sufficiency is claimed, which costs nothing:
+
+* soundness is unaffected, since sufficiency is the direction that matters —
+  if the test fires, `Z` really is `S2`;
+* termination is unaffected, because a sufficiently factorial `m` means
+  `(I^(m))^k = I^(km)` for all `k`, so `A = ⊕_k O_X(-kmE)` is a divisorial
+  algebra over a normal ring and therefore normal, and the test is certain to
+  fire by then. Independently of that, `isNormalSource` implies `isS2Source`, so
+  the loop stops no later than it did before.
+
+The only thing lost is optimality: over a weighted base the loop may try one
+more `m` than strictly necessary.
 
 ### Measurements
 

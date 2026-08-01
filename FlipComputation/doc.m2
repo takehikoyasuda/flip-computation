@@ -182,16 +182,23 @@ Description
     for, because the vertex locus
     $V(A_+) \cong \operatorname{Spec} R$ has codimension one in
     $\operatorname{Spec} A$.
+    The test is sufficient whatever the weights: writing $B = A_f$ for a
+    relevant homogeneous $f$, $B$ is finite over $B' = B_0[f,f^{-1}]$ and $B'$
+    is a direct summand of $B$ as a $B'$-module, so $B$ being $S_2$ forces
+    $B_0 = A_{(f)}$ to be $S_2$. It is moreover {\em necessary}, hence exactly
+    the condition of Lemma 7.2, when every relevant variable has weight one: the
+    torus then acts freely on $\operatorname{Spec} A \setminus V(\mathrm{irr})$,
+    which becomes a torsor over $Z$ and lets $S_2$ travel in both directions.
+    That covers an affine base and a projective base with the standard grading.
 Caveat
   On its own this does not say that $Z$ is normal: it has to be combined with
   @TO isSmallProjection@.
 
-  Identifying $S_2$ for $A$ at a relevant prime with $S_2$ for $Z$ uses
-  $A_f = A_{(f)}[f,f^{-1}]$, which needs $f$ of degree one. The fiber variables
-  always have degree one, so the test is exact over an affine base and over a
-  projective base with the standard grading. Over a {\em weighted} projective
-  base it falls back to $S_2$ for the whole cone, which is sufficient but not
-  necessary.
+  Over a weighted grading only sufficiency is claimed. That costs nothing in
+  correctness: a sufficiently factorial $m$ makes
+  $A = \bigoplus_k \mathcal{O}_X(-kmE)$, a divisorial algebra over a normal ring
+  and hence normal, so the test is certain to fire by then. At worst
+  @TO computeFlip@ tries one more $m$ than strictly necessary.
 SeeAlso
   isNormalSource
   isSmallProjection

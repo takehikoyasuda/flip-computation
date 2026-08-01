@@ -133,28 +133,30 @@ isNormalSource B2MProjection := P -> isNormal(P#totalRing)
 -- asks for: the vertex locus V(A_+) is isomorphic to Spec R and has codimension
 -- one in Spec A, so requiring S2 there can reject an m that in fact works.
 --
--- Identifying S2 for A at a relevant prime with S2 for Z at the corresponding
--- point uses A_f = A_(f)[f,f^{-1}], which needs f of degree one.  The fiber
--- variables always have degree one; over a weighted projective base the base
--- variables need not, and there we fall back to S2 for the whole cone, which is
--- sufficient but not necessary.
+-- The test is always sufficient, whatever the weights.  Writing B = A_f for a
+-- relevant homogeneous f, B is finite over B' = B_0[f,f^{-1}] and B' is a direct
+-- summand of B as a B'-module, so depth B' >= depth B while the dimensions
+-- agree; hence B S2 gives B_0 = A_(f) S2, which is S2 for the chart of Z.
+--
+-- It is moreover necessary, so exactly Lemma 7.2's condition, when every
+-- relevant variable has weight one: the torus then acts freely on
+-- Spec A - V(irr), which becomes a torsor over Z and lets S2 travel both ways.
+-- That covers an affine base and a projective base with the standard grading.
+-- Over weighted gradings only sufficiency is claimed, which costs nothing in
+-- correctness: the algorithm may try one more m than strictly necessary, but a
+-- sufficiently factorial m makes A = (+)_k O_X(-kmE), a divisorial algebra over
+-- a normal ring and hence normal, so the test is certain to fire by then.
 isS2Source = method()
 isS2Source B2MProjection := P -> (
     A := P#ambientRing;
     I := P#definingIdeal;
+    irr := P#irrelevantIdeal;
     n := codim I;
     M := cokernel generators I;
-    js := toList(n+1 .. (dim A) - 1);
-    exact := (not isProjectiveBase P)
-        or all(P#baseVariables, v -> (degree v)#1 == 1);
-    if not exact then all(js, j -> codim Ext^j(M, A) >= j+2)
-    else (
-        irr := P#irrelevantIdeal;
-        all(js, j -> (
-            E := Ext^j(M, A);
-            E == 0 or all(minimalPrimes ann E,
-                q -> codim q >= j+2 or isSubset(irr, q))))
-        )
+    all(toList(n+1 .. (dim A) - 1), j -> (
+        E := Ext^j(M, A);
+        E == 0 or all(minimalPrimes ann E,
+            q -> codim q >= j+2 or isSubset(irr, q))))
     )
 
 -- Codimension of the exceptional locus (the second condition of Lemma 7.2).
