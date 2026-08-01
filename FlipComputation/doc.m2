@@ -58,9 +58,10 @@ Description
     normality", and normality is tested as $S_2$ alone: a small projection
     satisfies $R_1$ automatically, see @TO isS2Source@.
 Caveat
-  The $S_2$ test is applied to the bihomogeneous coordinate ring, that is, to
-  the affine cone over $Z^m$; this is sufficient but not necessary for $Z^m$
-  itself to be $S_2$.
+  The $S_2$ test is exact over an affine base and over a projective base with
+  the standard grading; over a weighted grading it is sufficient but not
+  necessary, so the loop may try one more $m$ than it strictly has to. See
+  @TO isS2Source@.
 SeeAlso
   BaseIsProjective
   bigradedReesProjection
@@ -334,4 +335,837 @@ Description
     turned into a monograded variety by means of the Segre isomorphism of
     Section 2.2, and the graph of the resulting morphism is computed as a
     bigraded variety.
+///
+
+doc ///
+Key
+  B2MProjection
+Headline
+  a bigraded variety together with its projection to a monograded variety
+Description
+  Text
+    Definition 2.4 of arXiv:2603.13703.  The source $Z$ is a bigraded variety
+    sitting in $\mathbf{P}^{r-1} \times X$, the base $X$ is the monograded
+    variety $\operatorname{Proj} R$, and the projection $\pi : Z \to X$ is the
+    restriction of the second projection.  This is the form in which
+    @TO computeFlip@ returns a flip.
+
+    As an extension beyond the scope of the paper the base may instead be
+    $\operatorname{Spec} R$; see @TO BaseIsProjective@ and @TO isProjectiveBase@.
+
+    A projection is a hash table with the following keys.
+
+      @TO ambientRing@ -- the bigraded polynomial ring $k[u,x]$
+
+      @TO definingIdeal@ -- the bihomogeneous ideal of $Z$ in it
+
+      @TO totalRing@ -- the quotient by that ideal
+
+      @TO baseCoordinateRing@ -- the ring $R$ of the base
+
+      @TO fiberVariables@, @TO baseVariables@ -- the $u_i$ and the $x_j$
+
+      @TO irrelevantIdeal@ -- the ideal whose vanishing locus is empty
+
+      @TO blownUpIdeal@ -- the ideal of $R$ that was blown up, in $k[u,x]$
+
+      @TO uniformDegreeUsed@ -- the {\tt UniformDegree} passed, or {\tt null}
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2)
+    geometricDimension P
+SeeAlso
+  GraphMorphism
+  bigradedReesProjection
+  computeFlip
+///
+
+doc ///
+Key
+  GraphMorphism
+Headline
+  a morphism of monograded varieties, presented by its graph
+Description
+  Text
+    Section 2.4 of arXiv:2603.13703.  A morphism $W \to X$ of monograded
+    varieties is recorded as its graph inside $W \times X$, which is a bigraded
+    variety.  @TO b2mToGraphMorphism@ produces one from a @TO B2MProjection@,
+    and @TO computeFlip@ returns one when {\tt ReturnGraph => true}.
+
+    The keys are @TO ambientRing@, @TO definingIdeal@, @TO totalRing@,
+    @TO sourceRing@, @TO baseCoordinateRing@, @TO fiberVariables@,
+    @TO baseVariables@ and @TO irrelevantIdeal@, with the same meanings as for a
+    @TO B2MProjection@ except that @TO sourceRing@ now carries the monograded
+    model $W$ of the source and the fiber variables are the Segre coordinates.
+SeeAlso
+  B2MProjection
+  b2mToGraphMorphism
+///
+
+doc ///
+Key
+  ambientRing
+Headline
+  the bigraded polynomial ring a B2M projection lives in
+Description
+  Text
+    The ring $k[u_1,\dots,u_r,x_0,\dots,x_n]$, bigraded so that the relations of
+    the Rees algebra are bihomogeneous.  Its quotient by @TO definingIdeal@ is
+    @TO totalRing@.
+SeeAlso
+  B2MProjection
+///
+
+doc ///
+Key
+  definingIdeal
+Headline
+  the bihomogeneous ideal cutting out the source
+Description
+  Text
+    The ideal of @TO ambientRing@ defining $Z$, homogeneous for both gradings.
+SeeAlso
+  B2MProjection
+///
+
+doc ///
+Key
+  totalRing
+Headline
+  the bihomogeneous coordinate ring of the source
+Description
+  Text
+    The quotient of @TO ambientRing@ by @TO definingIdeal@, that is the affine
+    cone over $Z$.  Note that its Krull dimension exceeds $\dim Z$ by the number
+    of cone directions; @TO geometricDimension@ makes the correction.
+SeeAlso
+  B2MProjection
+  geometricDimension
+///
+
+doc ///
+Key
+  sourceRing
+Headline
+  the monograded coordinate ring of the source of a graph morphism
+Description
+  Text
+    The ring $W$ obtained from the source of a @TO B2MProjection@ by the Segre
+    isomorphism of Lemma 2.3.  Present only on a @TO GraphMorphism@.
+SeeAlso
+  GraphMorphism
+  b2mToGraphMorphism
+///
+
+doc ///
+Key
+  baseCoordinateRing
+Headline
+  the homogeneous coordinate ring of the base
+Description
+  Text
+    The ring $R$, so that the base is $\operatorname{Proj} R$ or, when
+    @TO isProjectiveBase@ is false, $\operatorname{Spec} R$.
+Caveat
+  Not to be confused with {\tt baseRing}, which belongs to Macaulay2 itself.
+  This key was called {\tt baseRing} before version 0.2.0 and was renamed
+  because it hid that function.
+SeeAlso
+  B2MProjection
+///
+
+doc ///
+Key
+  fiberVariables
+Headline
+  the variables of the fiber direction
+Description
+  Text
+    The $u_1,\dots,u_r$, one for each generator of the ideal being blown up.
+SeeAlso
+  B2MProjection
+  baseVariables
+///
+
+doc ///
+Key
+  baseVariables
+Headline
+  the variables coming from the base
+Description
+  Text
+    The images in @TO ambientRing@ of the variables of the ambient ring of
+    @TO baseCoordinateRing@.
+SeeAlso
+  B2MProjection
+  fiberVariables
+///
+
+doc ///
+Key
+  irrelevantIdeal
+Headline
+  the ideal whose vanishing locus is empty
+Description
+  Text
+    Over a projective base this is generated by the products $u_i x_j$
+    (Section 2.1); over an affine base only the fiber cone has to be removed, so
+    it is generated by the $u_i$ alone.  A bihomogeneous ideal defines a nonempty
+    subvariety exactly when it does not contain this one, which is how
+    @TO isSmallProjection@ and @TO isS2Source@ discard components that are not
+    really there.
+SeeAlso
+  B2MProjection
+///
+
+doc ///
+Key
+  blownUpIdeal
+Headline
+  the ideal that was blown up, as an ideal of the ambient bigraded ring
+Description
+  Text
+    The image of $J$ in @TO ambientRing@, where the projection is
+    $\operatorname{Proj} R[Jt] \to \operatorname{Proj} R$.  Its generators are
+    what @TO isSmallProjection@ tests, and in the toric examples reading them off
+    recovers the fan of $Z$.
+SeeAlso
+  B2MProjection
+  bigradedReesProjection
+///
+
+doc ///
+Key
+  uniformDegreeUsed
+Headline
+  the UniformDegree that was applied, or null
+Description
+  Text
+    Records the {\tt UniformDegree} passed to @TO bigradedReesProjection@.  It is
+    {\tt null} in the default, correct mode, in which the generators are left
+    alone and the fiber variables are weighted instead.
+SeeAlso
+  UniformDegree
+  singleDegreeIdeal
+///
+
+doc ///
+Key
+  geometricDimension
+  (geometricDimension, B2MProjection)
+Headline
+  the dimension of the source, with the cone directions removed
+Usage
+  d = geometricDimension P
+Inputs
+  P:B2MProjection
+Outputs
+  d:ZZ
+Description
+  Text
+    The Krull dimension of @TO totalRing@ minus the number of cone directions:
+    two over a projective base, where both the fiber and the base contribute a
+    cone, and one over an affine base.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    geometricDimension bigradedReesProjection ideal(x0,x2)
+SeeAlso
+  B2MProjection
+///
+
+doc ///
+Key
+  isProjectiveBase
+  (isProjectiveBase, B2MProjection)
+Headline
+  whether the base is Proj R rather than Spec R
+Usage
+  isProjectiveBase P
+Inputs
+  P:B2MProjection
+Outputs
+  :Boolean
+Description
+  Text
+    Reports how the projection was built.  Projections made before this
+    distinction existed are read as projective.
+SeeAlso
+  BaseIsProjective
+///
+
+doc ///
+Key
+  restrictToBase
+  (restrictToBase, B2MProjection, Ideal)
+Headline
+  the restriction of a bihomogeneous ideal to the base
+Usage
+  q0 = restrictToBase(P, q)
+Inputs
+  P:B2MProjection
+  q:Ideal
+    a bihomogeneous ideal of @TO ambientRing@
+Outputs
+  q0:Ideal
+    an ideal of @TO baseCoordinateRing@
+Description
+  Text
+    The ideal $\mathfrak{p}|_R$ of Section 2.3, obtained by eliminating the fiber
+    variables and then mapping them to zero.  It defines the image in $X$ of the
+    subvariety cut out by $q$, which is what @TO isSmallProjection@ compares
+    dimensions against.
+SeeAlso
+  B2MProjection
+  isSmallProjection
+///
+
+doc ///
+Key
+  canonicalDivisorData
+  (canonicalDivisorData, Ring)
+Headline
+  a canonical divisor of X, as prime-multiplicity pairs
+Usage
+  Kdata = canonicalDivisorData R
+Inputs
+  R:Ring
+Outputs
+  Kdata:List
+    pairs $\{p_i, n_i\}$ with $p_i$ a height-one prime and $n_i \ne 0$, so that
+    $K_X = \sum n_i D_i$ with $D_i = V(p_i)$
+Description
+  Text
+    Step 1 of Algorithm 3.  The canonical module is computed by the {\tt Divisor}
+    package as $\operatorname{Ext}^t(R,\omega)$.
+  Example
+    R = QQ[x0,x1,x2,x3];
+    canonicalDivisorData R
+  Text
+    which reads $K_{\mathbf{P}^3} = -4H$.
+Caveat
+  Which representative of the canonical class comes back depends on the grading,
+  and over a weighted grading it can be a bad one; that is the reason
+  @TO flipDivisorData@ prefers @TO canonicalIdeal@ to the route through
+  @TO antiCanonicalSection@.
+SeeAlso
+  antiCanonicalSection
+  flipDivisorData
+///
+
+doc ///
+Key
+  antiCanonicalSection
+  (antiCanonicalSection, Ring)
+  (antiCanonicalSection, Ring, List)
+Headline
+  a homogeneous s of least degree with -K_X + div(s) effective
+Usage
+  s = antiCanonicalSection R
+  s = antiCanonicalSection(R, Kdata)
+Inputs
+  R:Ring
+  Kdata:List
+    the output of @TO canonicalDivisorData@, computed afresh if omitted
+Outputs
+  s:RingElement
+Description
+  Text
+    Step 2 of Algorithm 3: an element of $\prod_i p_i^{\max(0,n_i)}$, taken of
+    least degree among the generators of that product.  When every $n_i$ is
+    negative -- which happens routinely in the toric examples -- the product is
+    the unit ideal and $s = 1$.
+Caveat
+  This is the paper's construction and it is kept for that reason, but it is not
+  what @TO flipDivisorData@ does by default.  The $s$ produced here inherits
+  whatever representative of $K_X$ the {\tt Divisor} package returns; over a
+  weighted grading that can force $I^{(m)}$ into an enormous degree, and the
+  computation becomes hopeless.  See @TO canonicalIdeal@.
+SeeAlso
+  canonicalIdeal
+  canonicalDivisorData
+///
+
+doc ///
+Key
+  flipDivisorData
+  (flipDivisorData, Ring)
+Headline
+  the divisor E with I = O_X(-E) isomorphic to omega_X
+Usage
+  (s, Edata) = flipDivisorData R
+Inputs
+  R:Ring
+Outputs
+  :Sequence
+    the section used, or {\tt null} when the embedding route was taken, followed
+    by pairs $\{p_i, e_i\}$ describing $E$
+Description
+  Text
+    Step 3 of Algorithm 3.  By default $I$ is @TO canonicalIdeal@, an embedding
+    $\omega_X \hookrightarrow R$ of least degree, and $E$ is the divisor of that
+    ideal; passing {\tt AntiCanonicalSection => s} follows the paper instead and
+    forms $\operatorname{div}(s) - K_X$.
+
+    $E$ is effective because $I$ is an ideal of $R$, and $-E$ is linearly
+    equivalent to $K_X$ because $I$ is isomorphic to $\omega_X$.
+Caveat
+  An error is raised when $\omega_X$ is free, since $K_X$ is then linearly
+  trivial and the contraction is a flop rather than a flip, and when $E$ turns
+  out not to be effective.
+SeeAlso
+  canonicalIdeal
+  divisorialIdeal
+///
+
+doc ///
+Key
+  divisorialIdeal
+  (divisorialIdeal, List, ZZ)
+Headline
+  the divisorial ideal O_X(-mE)
+Usage
+  Im = divisorialIdeal(Edata, m)
+Inputs
+  Edata:List
+    the second component of the output of @TO flipDivisorData@
+  m:ZZ
+Outputs
+  Im:Ideal
+Description
+  Text
+    The symbolic power $I^{(m)}$ of Step 5.  Mathematically this is
+    $\bigcap_i p_i^{(m e_i)}$, but computing it that way through
+    {\tt SymbolicPowers} is ruinous, because the saturations blow up with $m$:
+    3.2 seconds at $m = 8$ on the threefold of {\tt examples/toric-flip.m2}, and
+    far worse beyond.  The {\tt Divisor} package builds $\mathcal{O}_X(-D)$ from
+    products of ordinary powers and a reflexive hull instead, which on the same
+    example takes about 0.006 seconds and is essentially flat in $m$.  The two
+    agree.
+SeeAlso
+  flipDivisorData
+///
+
+doc ///
+Key
+  bigradedReesIdeal
+  (bigradedReesIdeal, Ideal)
+Headline
+  the Rees algebra of an ideal, as a bihomogeneous ideal
+Usage
+  (A, IZ) = bigradedReesIdeal J
+Inputs
+  J:Ideal
+Outputs
+  :Sequence
+    the bigraded polynomial ring $k[u,x]$, and the ideal of $R[Jt]$ in it
+Description
+  Text
+    The kernel of $k[u,x] \to R[t]$, $u_i \mapsto f_i t$, computed by giving $t$
+    the degree $(1,-d_0)$ and eliminating it.  The grading is the one described
+    at @TO bigradedReesProjection@; over an affine base the $u$-degree alone is
+    used and is left implicit, since none of the operations involved needs it.
+SeeAlso
+  bigradedReesProjection
+///
+
+doc ///
+Key
+  isNormalSource
+  (isNormalSource, B2MProjection)
+Headline
+  test normality of the affine cone over the source
+Usage
+  isNormalSource P
+Inputs
+  P:B2MProjection
+Outputs
+  :Boolean
+Description
+  Text
+    Asks {\tt isNormal} of @TO totalRing@.  This is sufficient for $Z$ to be
+    normal but not necessary, and it is expensive: {\tt isNormal} checks $S_2$
+    and then $R_1$, and the $R_1$ half goes through
+    {\tt minors(codim I, jacobian)}, which explodes.  On one nine-variable
+    example the $S_2$ half took 0.02 seconds and the $R_1$ half 119, with the
+    minors having 1,436,495 generators.
+Caveat
+  @TO computeFlip@ does not use this.  Once the projection is known to be small,
+  $R_1$ is automatic and normality reduces to @TO isS2Source@, which is the test
+  actually run.
+SeeAlso
+  isS2Source
+  isSmallProjection
+///
+
+doc ///
+Key
+  segreHilbertBasis
+  (segreHilbertBasis, List, List)
+Headline
+  the Hilbert basis of the monoid defining a Segre product
+Usage
+  HB = segreHilbertBasis(ds, cs)
+Inputs
+  ds:List
+    the weights $d_j$ of the first factor
+  cs:List
+    the weights $c_i$ of the second
+Outputs
+  HB:List
+    the Hilbert basis, as exponent vectors
+Description
+  Text
+    Lemma 2.3 of arXiv:2603.13703.  The monoid is
+    $$A = \{(b,a) \in \mathbf{N}^{n+1}\times\mathbf{N}^{m+1} :
+      \textstyle\sum_j d_j b_j = \sum_i c_i a_i\},$$
+    and its Hilbert basis gives the monomial generators of the Segre product
+    $k[y] \# k[x]$.
+  Example
+    #segreHilbertBasis({1,1},{1,1})
+    #segreHilbertBasis({1,1},{1,2})
+  Text
+    The first is the Segre product of two copies of $\mathbf{P}^1$, with the four
+    generators one expects; the weighted case needs a fifth.
+SeeAlso
+  segreProductRing
+  b2mToGraphMorphism
+///
+
+doc ///
+Key
+  segreProductRing
+  (segreProductRing, Ring, List, List)
+Headline
+  a polynomial ring mapping onto a Segre product
+Usage
+  (T, HB, zdegs) = segreProductRing(kk, ds, cs)
+Inputs
+  kk:Ring
+    the coefficient field
+  ds:List
+  cs:List
+Outputs
+  :Sequence
+    a polynomial ring $k[z_1,\dots,z_s]$, the exponent vectors of the
+    corresponding monomials, and their degrees
+Description
+  Text
+    One variable for each element of @TO segreHilbertBasis@, graded by the degree
+    of the monomial it stands for.  @TO b2mToGraphMorphism@ maps it onto the
+    Segre product and takes the kernel.
+SeeAlso
+  segreHilbertBasis
+///
+
+doc ///
+Key
+  graphMorphismIdeal
+  (graphMorphismIdeal, GraphMorphism)
+Headline
+  the bihomogeneous ideal defining a graph
+Usage
+  I = graphMorphismIdeal G
+Inputs
+  G:GraphMorphism
+Outputs
+  I:Ideal
+Description
+  Text
+    The same thing as {\tt G#definingIdeal}.
+Caveat
+  Called {\tt graphIdeal} before version 0.2.0, which hid Macaulay2's own
+  {\tt graphIdeal} for ring maps.
+SeeAlso
+  GraphMorphism
+  definingIdeal
+///
+
+doc ///
+Key
+  uniformDegree
+  (uniformDegree, Ideal)
+Headline
+  the largest degree of a generator
+Usage
+  D = uniformDegree J
+Inputs
+  J:Ideal
+Outputs
+  D:ZZ
+Description
+  Text
+    The degree the paper's Step 5 implicitly levels the generators to, and the
+    natural argument to {\tt UniformDegree}.  It is useful mainly for seeing
+    whether the generators share a degree in the first place: they do exactly
+    when {\tt degrees J} is constant, and only then does the paper's grading
+    $\deg u_i = (1,0)$ apply.
+SeeAlso
+  UniformDegree
+  singleDegreeIdeal
+///
+
+doc ///
+Key
+  AntiCanonicalSection
+Headline
+  follow the paper's Step 2 with a given section
+Description
+  Text
+    Passing {\tt AntiCanonicalSection => s} makes @TO flipDivisorData@ and
+    @TO computeFlip@ form $E = \operatorname{div}(s) - K_X$, which is Step 3 of
+    the paper.  The default, {\tt null}, embeds $\omega_X$ into $R$ directly with
+    @TO canonicalIdeal@ and is very much faster over a weighted grading.
+Caveat
+  Called {\tt Section} before version 0.2.0.  That name collided with
+  {\tt SimpleDoc}'s and made the package impossible to install.
+SeeAlso
+  antiCanonicalSection
+  canonicalIdeal
+///
+
+doc ///
+Key
+  Multipliers
+Headline
+  the multipliers m to try, in order
+Description
+  Text
+    A list, overriding the schedule @TO multiplierSchedule@ would produce.  Since
+    any $m$ that works gives the same answer, this is chiefly a way to pin an
+    example to the $m$ known to settle it, or to check that a smaller $m$ really
+    is rejected.
+SeeAlso
+  MaxSteps
+  multiplierSchedule
+///
+
+doc ///
+Key
+  MaxSteps
+Headline
+  how far the schedule of multipliers runs
+Description
+  Text
+    @TO computeFlip@ tries every divisor of {\tt MaxSteps}$!$ in increasing
+    order, which contains the $1!, 2!, \dots$ of the paper.  The default is 4,
+    giving $1,2,3,4,6,8,12,24$.
+SeeAlso
+  Multipliers
+  multiplierSchedule
+///
+
+doc ///
+Key
+  ReturnGraph
+Headline
+  return the flip as a graph morphism
+Description
+  Text
+    With {\tt ReturnGraph => true}, @TO computeFlip@ passes its answer through
+    @TO b2mToGraphMorphism@ and returns a @TO GraphMorphism@ instead of a
+    @TO B2MProjection@.  This needs a projective base and fiber variables without
+    weights.
+SeeAlso
+  b2mToGraphMorphism
+///
+
+doc ///
+Key
+  UniformDegree
+Headline
+  level the generators to a single degree before blowing up
+Description
+  Text
+    Replaces $J$ by the ideal generated by its degree-$D$ part, which is how the
+    paper's Step 5 arranges for the Rees relations to be bihomogeneous.
+Caveat
+  Sound only for the standard grading.  Over a weighted grading it can drop a
+  generator and blow up a different ideal; see @TO singleDegreeIdeal@.  It is not
+  the default, and the default needs no levelling at all.
+SeeAlso
+  singleDegreeIdeal
+  uniformDegree
+  uniformDegreeUsed
+///
+
+doc ///
+Key
+  [computeFlip, AntiCanonicalSection]
+Headline
+  follow the paper's Step 2 with a given section
+Usage
+  computeFlip(R, AntiCanonicalSection => s)
+Description
+  Text
+    See @TO AntiCanonicalSection@.
+///
+
+doc ///
+Key
+  [computeFlip, Multipliers]
+Headline
+  the multipliers m to try, in order
+Usage
+  computeFlip(R, Multipliers => ms)
+Description
+  Text
+    See @TO Multipliers@.
+///
+
+doc ///
+Key
+  [computeFlip, MaxSteps]
+Headline
+  how far the schedule of multipliers runs
+Usage
+  computeFlip(R, MaxSteps => n)
+Description
+  Text
+    See @TO MaxSteps@.
+///
+
+doc ///
+Key
+  [computeFlip, ReturnGraph]
+Headline
+  return the flip as a graph morphism
+Usage
+  computeFlip(R, ReturnGraph => true)
+Description
+  Text
+    See @TO ReturnGraph@.
+///
+
+doc ///
+Key
+  [computeFlip, BaseIsProjective]
+Headline
+  run the algorithm over an affine base
+Usage
+  computeFlip(R, BaseIsProjective => false)
+Description
+  Text
+    See @TO BaseIsProjective@.
+///
+
+doc ///
+Key
+  [computeFlip, Verbose]
+Headline
+  report each multiplier and each test as it is tried
+Usage
+  computeFlip(R, Verbose => false)
+Description
+  Text
+    On by default here, since a run can take a long time and the progress
+    through the multipliers is the useful thing to watch.
+///
+
+doc ///
+Key
+  [bigradedReesProjection, UniformDegree]
+Headline
+  level the generators to a single degree before blowing up
+Usage
+  bigradedReesProjection(J, UniformDegree => D)
+Description
+  Text
+    See @TO UniformDegree@.
+///
+
+doc ///
+Key
+  [bigradedReesProjection, BaseIsProjective]
+Headline
+  build the projection over an affine base
+Usage
+  bigradedReesProjection(J, BaseIsProjective => false)
+Description
+  Text
+    See @TO BaseIsProjective@.
+///
+
+doc ///
+Key
+  [bigradedReesIdeal, BaseIsProjective]
+Headline
+  present the Rees algebra over an affine base
+Usage
+  bigradedReesIdeal(J, BaseIsProjective => false)
+Description
+  Text
+    See @TO BaseIsProjective@.
+///
+
+doc ///
+Key
+  [canonicalDivisorData, BaseIsProjective]
+Headline
+  compute the canonical divisor of an affine ring
+Usage
+  canonicalDivisorData(R, BaseIsProjective => false)
+Description
+  Text
+    Passed to the {\tt Divisor} package as its {\tt IsGraded} option.  See
+    @TO BaseIsProjective@.
+///
+
+doc ///
+Key
+  [antiCanonicalSection, BaseIsProjective]
+Headline
+  choose a section over an affine base
+Usage
+  antiCanonicalSection(R, BaseIsProjective => false)
+Description
+  Text
+    See @TO BaseIsProjective@.
+///
+
+doc ///
+Key
+  [flipDivisorData, AntiCanonicalSection]
+Headline
+  follow the paper's Step 3 with a given section
+Usage
+  flipDivisorData(R, AntiCanonicalSection => s)
+Description
+  Text
+    See @TO AntiCanonicalSection@.
+///
+
+doc ///
+Key
+  [flipDivisorData, BaseIsProjective]
+Headline
+  compute E over an affine base
+Usage
+  flipDivisorData(R, BaseIsProjective => false)
+Description
+  Text
+    See @TO BaseIsProjective@.
+///
+
+doc ///
+Key
+  [isSmallProjection, Verbose]
+Headline
+  report the dimension of each component and whether it is contracted
+Usage
+  isSmallProjection(P, Verbose => true)
+Description
+  Text
+    Off by default.  @TO computeFlip@ turns it on when it is itself verbose.
+///
+
+doc ///
+Key
+  [b2mToGraphMorphism, Verbose]
+Headline
+  report the size of the Segre product
+Usage
+  b2mToGraphMorphism(P, Verbose => true)
+Description
+  Text
+    Off by default.
 ///

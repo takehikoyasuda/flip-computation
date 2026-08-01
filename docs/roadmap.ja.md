@@ -354,11 +354,21 @@ X_proj = Proj k[y_1..y_5, w]/I  ⊂ P^5,  deg w = 1
 
       後の2つはエラーにならないが、`needsPackage` した利用者から M2 の標準関数が
       見えなくなるので直した。改名後、警告は一つも出ない。
-  * **残: ドキュメント整備。** export 41 個のうち文書があるのは 10 個。
-    未文書 31 個の内訳はハッシュキー 12・オプション 5・中間関数 14 なので、
-    doc を 31 個書くより **export を絞る方が先**。`installPackage` は現状
-    「missing node: `computeFlip(...,MaxSteps=>...)` 」等の警告を出す
-    （オプションごとの doc ノードが無いため）。エラーではない。
+  * ~~ドキュメント整備~~ **完了。export 39 個すべてに doc が付き、
+    `installPackage` の警告はゼロになった**（doc ノード 10 → 55、HTML 57 ページ）。
+    * まず export を 41 → 39 に。落としたのは `b2mProjection`（生の
+      HashTable を型に変えるだけの内部コンストラクタ）と `baseIsProjective`
+      （キーの実体。`isProjectiveBase` が既にアクセサ）。どちらも外部での
+      使用は0件だった。
+    * 非 export にすると `baseIsProjective` が
+      「mutable unexported unset symbol」でエラーになる。ハッシュキーとして
+      読むだけで代入がないため。`protect baseIsProjective` を宣言して解決。
+    * 残り31個に doc を追加。内訳は型2・関数13・オプション5・ハッシュキー10、
+      加えて**オプション×メソッドのノード15個**
+      （`[computeFlip, MaxSteps]` の形。`missing node` 警告はこれが無いために出る）。
+    * 作業中に `computeFlip` の doc の Caveat が**B-1 以前の記述のまま**
+      （「S2 は錐で判定するので十分条件」）だったのを発見。現在は Z 上で
+      厳密に判定しているので、重み付きのときだけ十分条件、と直した。
   * **残: CI。** GitHub Actions で `M2 --script tests/run-tests.m2`。
     13 件・5 秒なので軽い。
 

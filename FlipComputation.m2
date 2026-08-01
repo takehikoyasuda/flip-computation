@@ -28,7 +28,6 @@ export {
     "B2MProjection",
     "GraphMorphism",
     -- Section 2
-    "b2mProjection",
     "segreHilbertBasis",
     "segreProductRing",
     "b2mToGraphMorphism",
@@ -67,11 +66,15 @@ export {
     "baseCoordinateRing",
     "fiberVariables",
     "baseVariables",
-    "baseIsProjective",
     "irrelevantIdeal",
     "blownUpIdeal",
     "uniformDegreeUsed"
     }
+
+-- A hash key of B2MProjection that is deliberately not exported: isProjectiveBase
+-- is the accessor, and it copes with projections built before the key existed.
+-- It has to be protected because nothing ever assigns to it.
+protect baseIsProjective
 
 -- Resolve the auxiliary files relative to this file, not to the directory M2 was
 -- started in: check runs some tests in a scratch directory.
