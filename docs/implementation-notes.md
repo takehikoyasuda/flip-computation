@@ -373,7 +373,9 @@ strictly stronger in practice.
 
 ## Known limitations
 
-* Normality is tested on the cone, see above.
+* Over a weighted grading the `S2` test is sufficient but not known to be
+  necessary, see above; over an affine base and over a standard-graded projective
+  base it is exactly Lemma 7.2's condition.
 * The base field is `QQ` in the examples; the paper works over `Qbar`. Nothing in
   the code assumes `QQ`, but arithmetic over number fields has not been tested.
 * No check is made that the input really is the target of a flipping contraction;

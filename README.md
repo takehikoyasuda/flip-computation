@@ -64,10 +64,28 @@ cheap.
 | `FlipComputation/` | implementation split by topic |
 | `examples/` | worked examples |
 | `tests/` | regression tests |
+| `IMPLEMENTATION.md` | technical note: the construction, the examples, and what they verify |
 | `docs/` | notes relating the code to the paper, and the development plan |
 
-See `docs/implementation-notes.md` for the correspondence with the paper and
-`docs/roadmap.ja.md` for what is planned next.
+The technical note [IMPLEMENTATION.md](IMPLEMENTATION.md) describes the
+mathematics, the worked examples with their actual Macaulay2 output, and the
+independent checks that the answers are compared against.
+`docs/implementation-notes.md` gives the line-by-line correspondence with the
+paper and the measurements, and `docs/roadmap.ja.md` records what is planned
+next.
+
+## Use of AI
+
+The code, the tests, and the technical note were written essentially by an AI
+system (Claude), with edits by the author.  The author has read them and believes
+them to be correct, but has not checked every detail.  The algorithm is the one
+in the paper above and nothing conceptually difficult is attempted here, and each
+example is checked automatically against independently known geometry — the
+triangulations of a circuit, the sign of `K.C` on the wall curve, determinants of
+cones, canonical classes of `P^3` and of a quadric threefold — so large errors are
+unlikely.  It is a research prototype, not verified software.  One error that had
+survived every existing test was in fact caught this way; see
+[IMPLEMENTATION.md](IMPLEMENTATION.md).
 
 ## License
 
