@@ -46,7 +46,7 @@ M2 --script tests/run-tests.m2      # "all tests passed" が出れば OK
 ```
 
 必要なのは Macaulay2 本体のみ（1.24.05 と 1.24.11 で確認）。使用パッケージ
-`Divisor`, `SymbolicPowers`, `MinimalPrimes`, `IntegralClosure`, `Elimination`,
+`WeilDivisors`, `SymbolicPowers`, `MinimalPrimes`, `IntegralClosure`, `Elimination`,
 `Polyhedra` はすべて M2 同梱。
 
 macOS + Homebrew の注意: `macaulay2 1.24.05` は `icu4c` 74 系にリンクしており、
@@ -75,20 +75,20 @@ done
 * `b2mToGraphMorphism` はアフィンでは意味を持たない（Lemma 2.3 の Segre 構成が
   両方の次数付けを要る）ので明示的にエラーにした。
 * `canonicalDivisorData` / `antiCanonicalSection` / `flipDivisorData` にも
-  `BaseIsProjective` を通した（`Divisor` の `IsGraded` に渡すだけ）。
+  `BaseIsProjective` を通した（`WeilDivisors` の `IsGraded` に渡すだけ）。
 * パッケージ本体の `load "FlipComputation/basics.m2"` が相対パスだったため、
   `check` がサブプロセスでテストを走らせるとファイルが見つからず落ちていた。
   `currentFileDirectory` 基準に修正済み。
-* TEST ブロックからは `PackageImports` の `Divisor` のシンボル（`canonicalDivisor`,
+* TEST ブロックからは `PackageImports` の `WeilDivisors` のシンボル（`canonicalDivisor`,
   `divisor`）が見えない（`Polyhedra` のものは見える）。テストではパッケージ自身の
   `canonicalDivisorData` を使い、線形同値の確認は `examples/toric-flip.m2` 側で
-  `needsPackage "Divisor"` して行っている。
+  `needsPackage "WeilDivisors"` して行っている。
 
 検証結果（`examples/toric-flip.m2`、実行約 0.7 秒）:
 
 * `K_X` は `-D_1 - D_3` として返る。トーリックな `-Σ D_i` とは主因子
   `div(y_1) = D_2 + D_4` の分だけ違い、線形同値であることを確認した。
-  当初「`-Σ D_i` になるはず」と書いたが、`Divisor` パッケージが返すのは
+  当初「`-Σ D_i` になるはず」と書いたが、`WeilDivisors` パッケージが返すのは
   標準加群から作った代表元なので一致する必要はない。
 * `s = 1`, `E = D_1 + D_3`, `I = O_X(-E)` の生成元はちょうど2個。したがって
   Z ⊂ P^1 × X で、これは Z の極大錐の個数と一致する。
@@ -263,7 +263,7 @@ X_proj = Proj k[y_1..y_5, w]/I  ⊂ P^5,  deg w = 1
 
    切り分けの結果、原因は**予想2つのうち後者**だった。`M = ∏ p_i^max(0,n_i)` を
    symbolic power の共通部分 `∩ p_i^(max(0,n_i))` に広げても生成元は変わらず
-   （どちらも次数22が12個）、悪かったのは `Divisor` が返す K_X の代表元の方。
+   （どちらも次数22が12個）、悪かったのは `WeilDivisors` が返す K_X の代表元の方。
    重み付き次数では係数 11 の成分が出てしまう。なお射影版で余計な `y_1^2` が
    付いていたのも同じ現象で、これも解消した（アフィン版と同一の I になる）。
 
@@ -271,11 +271,11 @@ X_proj = Proj k[y_1..y_5, w]/I  ⊂ P^5,  deg w = 1
    必要な m も変わりうる。未検討。
 4. ~~**symbolic power**~~ **完了。`SymbolicPowers` を使うのをやめた。**
 
-   `intersect_i symbolicPower(p_i, m e_i)` は飽和が m と共に爆発する。`Divisor` の
+   `intersect_i symbolicPower(p_i, m e_i)` は飽和が m と共に爆発する。`WeilDivisors` の
    `ideal(mE)`（通常べきの積 + reflexive hull）に差し替えたら、結果は一致したまま
    ほぼ定数時間になった。`examples/toric-flip.m2` の3-fold で:
 
-   | m | `intersect symbolicPower` | `Divisor` の `ideal(mE)` |
+   | m | `intersect symbolicPower` | `WeilDivisors` の `ideal(mE)` |
    |---|---|---|
    | 2 | 0.115 s | 0.005 s |
    | 4 | 0.212 s | 0.006 s |

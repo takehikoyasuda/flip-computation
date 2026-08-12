@@ -18,7 +18,7 @@ Early development. The API is unstable.
 ## Requirements
 
 * Macaulay2 (tested with 1.24.05 and 1.24.11)
-* Bundled packages: `Divisor`, `SymbolicPowers`, `Polyhedra`,
+* Bundled packages: `WeilDivisors`, `SymbolicPowers`, `Polyhedra`,
   `IntegralClosure`, `MinimalPrimes`, `Elimination`
 
 ## Usage

@@ -174,7 +174,7 @@ with 1 436 495 generators, against 0.02 s for \(S_2\).
 to embedding \(\omega_X\) into \(R\) as an ideal, so instead of choosing
 \(s\) the implementation takes a homomorphism \(\omega_X \to R\) of
 least degree. The \(s\) of Step 2 inherits whichever representative of
-the canonical class the \texttt{Divisor} package returns; under the
+the canonical class the \texttt{WeilDivisors} package returns; under the
 grading \(\ell = (2,2,1)\) that gives \(s = y_3^{11}\) and an
 \(I^{(1)}\) in degree 30, and the computation does not finish in
 seventeen minutes. The direct embedding gives generators of degree 2 and
@@ -192,7 +192,7 @@ is nearly free.
 reproducibility}\label{environment-and-reproducibility}
 
 Computed with Macaulay2 1.24.11 on macOS (Apple Silicon), using the
-bundled packages \texttt{Divisor}, \texttt{SymbolicPowers},
+bundled packages \texttt{WeilDivisors}, \texttt{SymbolicPowers},
 \texttt{Polyhedra}, \texttt{IntegralClosure}, \texttt{MinimalPrimes} and
 \texttt{Elimination}. From the repository root:
 
@@ -646,7 +646,7 @@ above and in the implementation notes.
   system for research in algebraic geometry.
   \url{https://macaulay2.com/}
 \item
-  \textbf{Schwede, K., Smith, Z. et al.} The \texttt{Divisor} package
+  \textbf{Schwede, K., Smith, Z. et al.} The \texttt{WeilDivisors} package
   for Macaulay2. (Canonical divisors and divisorial ideals; used in
   place of \texttt{SymbolicPowers}.)
 \end{itemize}

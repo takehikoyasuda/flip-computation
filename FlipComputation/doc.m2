@@ -215,7 +215,7 @@ Description
 
     It matters which one is used. The $s$ that @TO antiCanonicalSection@
     produces depends on which representative of the canonical class the
-    {\tt Divisor} package returns, and that depends on the grading. On the
+    {\tt WeilDivisors} package returns, and that depends on the grading. On the
     threefold of {\tt examples/toric-flip-projective.m2}, graded by
     $(2,2,1)$, that route gives $s = y_3^{11}$ and an $I^{(1)}$ in degree 30,
     which does not finish; the least-degree embedding gives generators of degree
@@ -635,7 +635,7 @@ Outputs
     $K_X = \sum n_i D_i$ with $D_i = V(p_i)$
 Description
   Text
-    Step 1 of Algorithm 3.  The canonical module is computed by the {\tt Divisor}
+    Step 1 of Algorithm 3.  The canonical module is computed by the {\tt WeilDivisors}
     package as $\operatorname{Ext}^t(R,\omega)$.
   Example
     R = QQ[x0,x1,x2,x3];
@@ -677,7 +677,7 @@ Description
 Caveat
   This is the paper's construction and it is kept for that reason, but it is not
   what @TO flipDivisorData@ does by default.  The $s$ produced here inherits
-  whatever representative of $K_X$ the {\tt Divisor} package returns; over a
+  whatever representative of $K_X$ the {\tt WeilDivisors} package returns; over a
   weighted grading that can force $I^{(m)}$ into an enormous degree, and the
   computation becomes hopeless.  See @TO canonicalIdeal@.
 SeeAlso
@@ -737,7 +737,7 @@ Description
     $\bigcap_i p_i^{(m e_i)}$, but computing it that way through
     {\tt SymbolicPowers} is ruinous, because the saturations blow up with $m$:
     3.2 seconds at $m = 8$ on the threefold of {\tt examples/toric-flip.m2}, and
-    far worse beyond.  The {\tt Divisor} package builds $\mathcal{O}_X(-D)$ from
+    far worse beyond.  The {\tt WeilDivisors} package builds $\mathcal{O}_X(-D)$ from
     products of ordinary powers and a reflexive hull instead, which on the same
     example takes about 0.006 seconds and is essentially flat in $m$.  The two
     agree.
@@ -1106,7 +1106,7 @@ Usage
   canonicalDivisorData(R, BaseIsProjective => false)
 Description
   Text
-    Passed to the {\tt Divisor} package as its {\tt IsGraded} option.  See
+    Passed to the {\tt WeilDivisors} package as its {\tt IsGraded} option.  See
     @TO BaseIsProjective@.
 ///
 

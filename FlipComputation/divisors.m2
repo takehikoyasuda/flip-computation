@@ -3,12 +3,12 @@
 -- with its symbolic powers.
 --
 -- The option BaseIsProjective distinguishes X = Proj R (the paper) from
--- X = Spec R; it only controls whether the Divisor package is asked to work
+-- X = Spec R; it only controls whether the WeilDivisors package is asked to work
 -- with graded or with arbitrary data.
 
 -- Step 1.  K_X = sum n_i D_i, returned as a list of pairs {p_i, n_i} where p_i is
 -- the height-one prime of R defining D_i.  The canonical module is computed by
--- the Divisor package as Ext^t(R, omega) (Section 3).
+-- the WeilDivisors package as Ext^t(R, omega) (Section 3).
 canonicalDivisorData = method(Options => {BaseIsProjective => true})
 canonicalDivisorData Ring := o -> R -> (
     K := canonicalDivisor(R, IsGraded => o.BaseIsProjective);
@@ -35,7 +35,7 @@ antiCanonicalSection (Ring, List) := o -> (R, Kdata) -> (
 -- is for a nonzero homomorphism omega_X --> R of least degree.
 --
 -- This matters a great deal.  The element s produced by antiCanonicalSection is
--- at the mercy of which representative of the canonical class the Divisor
+-- at the mercy of which representative of the canonical class the WeilDivisors
 -- package happens to return, and that depends on the grading: on the threefold
 -- of examples/toric-flip-projective.m2 the representative has a coefficient of
 -- 11 once the ring is graded by (2,2,1), the least s in prod p_i^n_i then has
@@ -87,7 +87,7 @@ flipDivisorData Ring := o -> R -> (
 -- Mathematically this is intersect_i p_i^(m e_i), but computing it that way
 -- through SymbolicPowers is ruinous: the saturations blow up with m, taking 3.2
 -- seconds at m = 8 on the threefold of examples/toric-flip.m2 and far worse
--- beyond.  The Divisor package builds O_X(-D) from products of ordinary powers
+-- beyond.  The WeilDivisors package builds O_X(-D) from products of ordinary powers
 -- and a reflexive hull instead, which on the same example is about 0.006
 -- seconds and essentially flat in m.  The two agree.
 divisorialIdeal = method()

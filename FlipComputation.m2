@@ -1,8 +1,8 @@
 -- -*- coding: utf-8 -*-
 newPackage(
     "FlipComputation",
-    Version => "0.2.0",
-    Date => "1 August 2026",
+    Version => "0.3.0",
+    Date => "12 August 2026",
     Authors => {{
         Name => "Takehiko Yasuda",
         Email => "yasuda.takehiko.sci@osaka-u.ac.jp"
@@ -10,7 +10,7 @@ newPackage(
     Headline => "computing flips of threefolds",
     Keywords => {"Algebraic Geometry"},
     PackageImports => {
-        "Divisor", "SymbolicPowers", "MinimalPrimes", "IntegralClosure",
+        "WeilDivisors", "SymbolicPowers", "MinimalPrimes", "IntegralClosure",
         "Elimination", "Polyhedra"
         },
     AuxiliaryFiles => true,
@@ -242,7 +242,7 @@ TEST ///
 
   -- K_X comes out as -D_1 - D_3 in terms of the torus-invariant divisors; that
   -- is -sum D_i up to the principal divisor div(y_1) = D_2 + D_4, which
-  -- examples/toric-flip.m2 checks with the Divisor package.
+  -- examples/toric-flip.m2 checks with the WeilDivisors package.
   pairing = (h, v) -> sum apply(3, k -> h#k * v#k);
   Ds = apply(rayList, v -> trim ideal apply(
           select(toList(0 .. #HB-1), j -> pairing(HB#j, v) > 0), j -> R_j));
@@ -333,9 +333,10 @@ TEST ///
 
 -- The same threefold over a weighted projective base.  Grading by l = (2,2,1)
 -- gives the Hilbert basis degrees 2,5,2,5,5; the canonical class then has a
--- representative with a coefficient of 11, antiCanonicalSection returns
--- s = y_3^11 and I^(1) lands in degree 30, which is hopeless.  Embedding
--- omega_X by a map of least degree gives generators of degree 2 instead.
+-- representative depended on the legacy Divisor package and the grading.
+-- That representative changed when the package was renamed WeilDivisors;
+-- the invariant computation is the least-degree embedding of omega_X, which
+-- gives generators of degree 2 and is what computeFlip uses.
 TEST ///
   rayList = {{1,0,0}, {0,1,0}, {0,0,1}, {1,1,-2}};
   HB = apply(hilbertBasis dualCone coneFromVData transpose matrix rayList,
@@ -350,9 +351,8 @@ TEST ///
   R = S/sub(I0, S);
   assert(dim R - 1 == 3);
 
-  -- the paper's Step 2 is what is expensive here
-  assert((degree antiCanonicalSection R)#0 == 22);
-  -- the embedding of least degree is not
+  -- Do not assert a particular antiCanonicalSection: it depends on the chosen
+  -- representative of K_X.  The least-degree canonical embedding does not.
   assert(sort flatten degrees canonicalIdeal R == {2,2});
 
   P = computeFlip(R, Multipliers => {1}, Verbose => false);

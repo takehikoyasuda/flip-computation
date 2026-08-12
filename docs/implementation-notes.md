@@ -12,7 +12,7 @@ How the code relates to arXiv:2603.13703, and where it deviates.
 | Def. 2.5, graph morphism | `GraphMorphism` |
 | Lemma 2.3, Segre product | `segreHilbertBasis`, `segreProductRing` (`segre.m2`) |
 | Lemma 2.6, B2M → graph | `b2mToGraphMorphism` (`segre.m2`) |
-| Section 3, canonical divisor | `canonicalDivisorData` (`divisors.m2`), via `Divisor::canonicalDivisor` |
+| Section 3, canonical divisor | `canonicalDivisorData` (`divisors.m2`), via `WeilDivisors::canonicalDivisor` |
 | Alg. 3, Step 1 | `canonicalDivisorData` |
 | Alg. 3, Step 2 | `antiCanonicalSection`, but see "Choice of s" below |
 | Alg. 3, Step 3 | `flipDivisorData`, `divisorialIdeal` |
@@ -108,7 +108,7 @@ construction instead;
 `antiCanonicalSection` still implements it.
 
 This is not a micro-optimisation. The `s` that `antiCanonicalSection` produces
-depends on which representative of the canonical class the `Divisor` package
+depends on which representative of the canonical class the `WeilDivisors` package
 happens to return, and that depends on the grading:
 
 | threefold of `examples/toric-flip-projective.m2` | via `s` | via `canonicalIdeal` |
@@ -125,11 +125,11 @@ still changes `I` and hence how large `m` has to be, and is not yet explored.
 
 **Symbolic powers.** `I^(m) = O_X(-mE)` is `intersect_i p_i^(m e_i)`
 mathematically, but computing it that way through `SymbolicPowers` is ruinous —
-the saturations blow up with `m`. The `Divisor` package builds `O_X(-D)` from
+the saturations blow up with `m`. The `WeilDivisors` package builds `O_X(-D)` from
 products of ordinary powers and a reflexive hull instead. On the threefold of
 `examples/toric-flip.m2`:
 
-| m | `intersect symbolicPower` | `Divisor`'s `ideal(mE)` |
+| m | `intersect symbolicPower` | `WeilDivisors`'s `ideal(mE)` |
 | --- | --- | --- |
 | 2 | 0.115 s | 0.005 s |
 | 4 | 0.212 s | 0.006 s |
