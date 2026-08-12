@@ -319,6 +319,29 @@ SeeAlso
 
 doc ///
 Key
+  b2mDiagonalData
+  (b2mDiagonalData, B2MProjection)
+Headline
+  choose a positive diagonal for a projective B2M projection
+Usage
+  data = b2mDiagonalData P
+Inputs
+  P:B2MProjection
+Outputs
+  data:HashTable
+Description
+  Text
+    For fibre degrees $(p_j,e_j)$, choose an integral slope
+    $D>\max_j(e_j/p_j)$ and return the Hilbert basis for the transformed
+    positive weights $Dp_j-e_j$, together with the monograded coordinate ring
+    and its degrees.  When every $e_j$ is zero this is the usual Segre diagonal.
+SeeAlso
+  b2mToGraphMorphism
+  segreHilbertBasis
+///
+
+doc ///
+Key
   b2mToGraphMorphism
   (b2mToGraphMorphism, B2MProjection)
 Headline
@@ -334,7 +357,11 @@ Description
     This is Lemma 2.6 of arXiv:2603.13703.  The source of the projection is
     turned into a monograded variety by means of the Segre isomorphism of
     Section 2.2, and the graph of the resulting morphism is computed as a
-    bigraded variety.
+    bigraded variety.  For a skew fibre block with degrees $(p_j,e_j)$, the
+    implementation chooses an integral slope $D>e_j/p_j$ and applies the same
+    affine-semigroup construction to the positive weights $Dp_j-e_j$.
+SeeAlso
+  b2mDiagonalData
 ///
 
 doc ///
