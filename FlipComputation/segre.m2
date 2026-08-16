@@ -25,6 +25,50 @@ segreProductRing (Ring, List, List) := (kk, ds, cs) -> (
     (T, HB, zdegs)
     )
 
+-- Choose an integral diagonal strictly inside the grading chamber of a
+-- projective B2M projection.  If deg(u_j)=(p_j,e_j), deg(x_i)=(0,c_i), and
+-- D>max(e_j/p_j), then a monomial u^b*x^a lies on the diagonal (n,Dn) exactly
+-- when
+--
+--     sum_j (D*p_j-e_j)b_j = sum_i c_i*a_i,   n=sum_j p_j*b_j.
+--
+-- Thus the usual affine-semigroup/Hilbert-basis construction applies with the
+-- positive transformed weights D*p_j-e_j, even when the fibre block is skew.
+b2mDiagonalData = method()
+b2mDiagonalData B2MProjection := P -> (
+    if not isProjectiveBase P then error(
+        "b2mDiagonalData: expected a projective base");
+    us := P#fiberVariables;
+    xs := P#baseVariables;
+    firstWeights := apply(us,u -> (degree u)#0);
+    shifts := apply(us,u -> (degree u)#1);
+    if any(firstWeights,p -> p <= 0) then error(
+        "b2mDiagonalData: fibre first weights must be positive");
+    slope := max(1,1+max apply(#us,j -> ceiling(shifts#j/firstWeights#j)));
+    transformedWeights := apply(#us,j ->
+        slope*firstWeights#j-shifts#j);
+    baseWeights := apply(xs,x -> (degree x)#1);
+    if any(baseWeights,c -> c <= 0) then error(
+        "b2mDiagonalData: base weights must be positive");
+    HB := segreHilbertBasis(transformedWeights,baseWeights);
+    coordinateDegrees := apply(HB,v ->
+        sum apply(#us,j -> firstWeights#j*v#j));
+    kk := coefficientRing P#ambientRing;
+    zz := getSymbol "z";
+    coordinateRing := kk(monoid [zz_1 .. zz_(#HB),
+        Degrees => coordinateDegrees]);
+    new HashTable from {
+        "coordinateRing" => coordinateRing,
+        "hilbertBasis" => HB,
+        "coordinateDegrees" => coordinateDegrees,
+        "diagonalSlope" => slope,
+        "fiberFirstWeights" => firstWeights,
+        "fiberShifts" => shifts,
+        "transformedFiberWeights" => transformedWeights,
+        "baseWeights" => baseWeights
+        }
+    )
+
 -- Lemma 2.6.  Given a strict B2M projection Z --> X with Z contained in Y x X,
 -- we present Z as a monograded variety W (via the Segre isomorphism) and compute
 -- the graph of the induced morphism W --> X as a bigraded variety in W x X.
@@ -38,22 +82,17 @@ b2mToGraphMorphism B2MProjection := o -> P -> (
     if not isProjectiveBase P then error(
         "b2mToGraphMorphism: the base must be projective; "
         | "a graph morphism of monograded varieties has no affine analogue here");
-    -- Lemma 2.3 needs the fiber variables to have bidegree (d_j, 0).  They do
-    -- exactly when the generators of the blown up ideal share a degree; when
-    -- they do not, bigradedReesIdeal weights the fiber direction instead.
-    if any(P#fiberVariables, v -> (degree v)#1 != 0) then error(
-        "b2mToGraphMorphism: the fiber variables carry weights, which happens "
-        | "when the generators of the blown up ideal have different degrees; "
-        | "the Segre construction of Lemma 2.3 does not apply");
     A := P#ambientRing;
     U := P#totalRing;
     R := P#baseCoordinateRing;
     us := P#fiberVariables;
     xs := P#baseVariables;
-    ds := apply(us, v -> (degree v)#0);
     cs := apply(xs, v -> (degree v)#1);
     kk := coefficientRing A;
-    (T, HB, zdegs) := segreProductRing(kk, ds, cs);
+    diagonalData := b2mDiagonalData P;
+    T := diagonalData#"coordinateRing";
+    HB := diagonalData#"hilbertBasis";
+    zdegs := diagonalData#"coordinateDegrees";
     if o.Verbose then << "-- Segre product has " << #HB << " generators" << endl;
     uU := apply(us, v -> sub(v, U));
     xU := apply(xs, v -> sub(v, U));

@@ -1,8 +1,8 @@
 -- -*- coding: utf-8 -*-
 newPackage(
     "FlipComputation",
-    Version => "0.2.0",
-    Date => "1 August 2026",
+    Version => "0.3.0",
+    Date => "12 August 2026",
     Authors => {{
         Name => "Takehiko Yasuda",
         Email => "yasuda.takehiko.sci@osaka-u.ac.jp"
@@ -31,6 +31,7 @@ export {
     -- Section 2
     "segreHilbertBasis",
     "segreProductRing",
+    "b2mDiagonalData",
     "b2mToGraphMorphism",
     "graphMorphismIdeal",
     "geometricDimension",
@@ -193,8 +194,16 @@ TEST ///
   assert(trim (P#definingIdeal + ideal(last xs - 1))
       == trim (phi(Paff#definingIdeal) + ideal(last xs - 1)));
 
-  -- the Segre construction does not apply once the fibre variables are weighted
-  assert(try (b2mToGraphMorphism P; false) else true);
+  -- the interior diagonal of slope two converts the skew fibre block to
+  -- positive transformed weights {2,1} and produces a graph morphism.
+  diagonal = b2mDiagonalData P;
+  assert(diagonal#"diagonalSlope" == 2);
+  assert(diagonal#"transformedFiberWeights" == {2,1});
+  G = b2mToGraphMorphism P;
+  assert(instance(G, GraphMorphism));
+  assert(dim(G#sourceRing)-1 == 3);
+  assert(dim(G#totalRing)-2 == 3);
+  assert(G#baseCoordinateRing === R);
 ///
 
 -- The schedule of multipliers is every divisor of MaxSteps! in increasing
@@ -359,7 +368,9 @@ TEST ///
   R = S/sub(I0, S);
   assert(dim R - 1 == 3);
 
-  -- the embedding of least degree
+  -- the embedding of least degree; do not assert a particular
+  -- antiCanonicalSection, since it depends on the chosen representative of
+  -- K_X, unlike the least-degree canonical embedding.
   assert(sort flatten degrees canonicalIdeal R == {2,2});
   (sEmbed, EdEmbed) = flipDivisorData R;
   dEmbed = max flatten degrees divisorialIdeal(EdEmbed, 1);

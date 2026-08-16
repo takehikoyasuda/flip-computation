@@ -590,11 +590,11 @@ nor a statement about inputs of a different shape.
   Only \(m \leq 2\) has been needed; larger \(m\) is exercised for cost,
   not for correctness.
 \item
-  The Segre construction of Lemma 2.3 requires the fibre variables to
-  have bidegree \((d_j, 0)\), so \texttt{b2mToGraphMorphism} does not
-  apply once the fibre weights are nontrivial, and raises an error.
-  Generalising it is the main open problem left by the correction
-  described above.
+  For nontrivial fibre degrees \((p_j,e_j)\), the graph bridge chooses an
+  integral slope \(D>\max(e_j/p_j)\).  The transformed weights
+  \(Dp_j-e_j\) are positive, so the Hilbert-basis construction applies
+  to the diagonal of bidegree \((n,Dn)\).  The weighted toric regression
+  has degrees \((1,0),(1,1)\), hence \(D=2\) and weights \(2,1\).
 \item
   There is no affine analogue of the graph morphism at all.
 \item

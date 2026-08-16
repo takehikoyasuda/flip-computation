@@ -12,7 +12,7 @@ How the code relates to arXiv:2603.13703, and where it deviates.
 | Def. 2.5, graph morphism | `GraphMorphism` |
 | Lemma 2.3, Segre product | `segreHilbertBasis`, `segreProductRing` (`segre.m2`) |
 | Lemma 2.6, B2M → graph | `b2mToGraphMorphism` (`segre.m2`) |
-| Section 3, canonical divisor | `canonicalDivisorData` (`divisors.m2`), via `Divisor::canonicalDivisor` |
+| Section 3, canonical divisor | `canonicalDivisorData` (`divisors.m2`), via `WeilDivisors::canonicalDivisor` |
 | Alg. 3, Step 1 | `canonicalDivisorData` |
 | Alg. 3, Step 2 | `antiCanonicalSection`, but see "Choice of s" below |
 | Alg. 3, Step 3 | `flipDivisorData`, `divisorialIdeal` |
@@ -59,9 +59,18 @@ grading `deg u_i = (1,0)`, and nothing changes; the old behaviour is the special
 case. `singleDegreeIdeal` is still exported, and `UniformDegree` still forces it,
 but neither is used by default.
 
-The one thing lost is that `b2mToGraphMorphism` no longer applies when the
-weights are nontrivial: Lemma 2.3 needs the fibre variables to have bidegree
-`(d_j, 0)`. It raises an error in that case.
+The graph bridge uses an interior diagonal when these weights are nontrivial.
+For general fibre degrees `(p_j,e_j)`, choose an integer
+`D > max(e_j/p_j)`. A monomial lies on the diagonal `(n,Dn)` precisely when
+
+    sum_j (D p_j-e_j)b_j = sum_i c_i a_i,
+    n = sum_j p_j b_j.
+
+The transformed fibre weights `D p_j-e_j` are positive, so the same Hilbert
+basis construction as Lemma 2.3 produces a monograded model. This is
+implemented by `b2mDiagonalData` and restores `b2mToGraphMorphism` for skew
+projective fibre blocks. In the weighted toric regression the degrees
+`(1,0),(1,1)` give `D=2` and transformed weights `2,1`.
 
 **Normality test.** `computeFlip` tests the two conditions of Lemma 7.2 in the
 order "exceptional locus, then normality", and tests normality as `S2` alone
@@ -108,7 +117,7 @@ construction instead;
 `antiCanonicalSection` still implements it.
 
 This is not a micro-optimisation. The `s` that `antiCanonicalSection` produces
-depends on which representative of the canonical class the `Divisor` package
+depends on which representative of the canonical class the `WeilDivisors` package
 happens to return, and that depends on the grading:
 
 | threefold of `examples/toric-flip-projective.m2` | via `s` | via `canonicalIdeal` |
@@ -130,11 +139,11 @@ still changes `I` and hence how large `m` has to be, and is not yet explored.
 
 **Symbolic powers.** `I^(m) = O_X(-mE)` is `intersect_i p_i^(m e_i)`
 mathematically, but computing it that way through `SymbolicPowers` is ruinous —
-the saturations blow up with `m`. The `Divisor` package builds `O_X(-D)` from
+the saturations blow up with `m`. The `WeilDivisors` package builds `O_X(-D)` from
 products of ordinary powers and a reflexive hull instead. On the threefold of
 `examples/toric-flip.m2`:
 
-| m | `intersect symbolicPower` | `Divisor`'s `ideal(mE)` |
+| m | `intersect symbolicPower` | `WeilDivisors`'s `ideal(mE)` |
 | --- | --- | --- |
 | 2 | 0.115 s | 0.005 s |
 | 4 | 0.212 s | 0.006 s |
