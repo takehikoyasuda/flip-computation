@@ -332,10 +332,18 @@ TEST ///
 ///
 
 -- The same threefold over a weighted projective base.  Grading by l = (2,2,1)
--- gives the Hilbert basis degrees 2,5,2,5,5; the canonical class then has a
--- representative with a coefficient of 11, antiCanonicalSection returns
--- s = y_3^11 and I^(1) lands in degree 30, which is hopeless.  Embedding
--- omega_X by a map of least degree gives generators of degree 2 instead.
+-- gives the Hilbert basis degrees 2,5,2,5,5, and the two routes to I part
+-- company: Step 2 of the paper inherits whichever representative of the
+-- canonical class the divisor package hands it, while embedding omega_X by a
+-- map of least degree does not.
+--
+-- How badly Step 2 does here depends on the package version, so the test
+-- asserts the gap and not the particular degrees.  Under M2 1.24 with Divisor
+-- it returned s = y_3^11 and an I^(1) in degree 30, and computeFlip did not
+-- finish in seventeen minutes; under 1.26 with WeilDivisors it returns s = 1
+-- and degree 8, which is survivable.  The direct embedding gives degree 2 in
+-- both, so the departure is worth making either way -- but the seventeen
+-- minutes are a fact about one version, not about the algorithm.
 TEST ///
   rayList = {{1,0,0}, {0,1,0}, {0,0,1}, {1,1,-2}};
   HB = apply(hilbertBasis dualCone coneFromVData transpose matrix rayList,
@@ -350,10 +358,16 @@ TEST ///
   R = S/sub(I0, S);
   assert(dim R - 1 == 3);
 
-  -- the paper's Step 2 is what is expensive here
-  assert((degree antiCanonicalSection R)#0 == 22);
-  -- the embedding of least degree is not
+  -- the embedding of least degree
   assert(sort flatten degrees canonicalIdeal R == {2,2});
+  (sEmbed, EdEmbed) = flipDivisorData R;
+  dEmbed = max flatten degrees divisorialIdeal(EdEmbed, 1);
+  assert(dEmbed == 2);
+  -- the paper's Step 2, which goes through a section
+  (sPaper, EdPaper) = flipDivisorData(R,
+      AntiCanonicalSection => antiCanonicalSection R);
+  dPaper = max flatten degrees divisorialIdeal(EdPaper, 1);
+  assert(dPaper > dEmbed);
 
   P = computeFlip(R, Multipliers => {1}, Verbose => false);
   assert(geometricDimension P == 3);

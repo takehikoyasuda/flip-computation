@@ -176,11 +176,17 @@ with 1 436 495 generators, against 0.02 s for \(S_2\).
 to embedding \(\omega_X\) into \(R\) as an ideal, so instead of choosing
 \(s\) the implementation takes a homomorphism \(\omega_X \to R\) of
 least degree. The \(s\) of Step 2 inherits whichever representative of
-the canonical class the \texttt{Divisor} package returns; under the
-grading \(\ell = (2,2,1)\) that gives \(s = y_3^{11}\) and an
-\(I^{(1)}\) in degree 30, and the computation does not finish in
-seventeen minutes. The direct embedding gives generators of degree 2 and
-takes 0.05 s --- on the same threefold.
+the canonical class the divisor package returns, and \emph{which}
+representative that is has changed under the package's own maintenance.
+Under the grading \(\ell = (2,2,1)\): with Macaulay2 1.24 and
+\texttt{Divisor} the section was \(s = y_3^{11}\), \(I^{(1)}\) landed in
+degree 30, and the computation did not finish in seventeen minutes; with
+1.26 and \texttt{WeilDivisors} it is \(s = 1\) and degree 8. The direct
+embedding gives degree 2 under both. So the size of the penalty is a
+fact about a package version, but its existence is not --- and neither
+is the reason for it, which is that Step 2 has no way to ask for a small
+representative and the embedding does. The regression test asserts the
+gap rather than either number.
 
 One further choice is worth recording, though it is not a departure.
 Step 4 stops at the first \(m\) that passes, and termination rests on
@@ -201,10 +207,13 @@ expensive, unlikely ones.
 \section{Environment and
 reproducibility}\label{environment-and-reproducibility}
 
-Computed with Macaulay2 1.24.11 on macOS (Apple Silicon), using the
-bundled packages \texttt{Divisor}, \texttt{SymbolicPowers},
-\texttt{Polyhedra}, \texttt{IntegralClosure}, \texttt{MinimalPrimes} and
-\texttt{Elimination}. From the repository root:
+Computed with Macaulay2 1.26.06 on macOS (Apple Silicon), and previously
+with 1.24.05 and 1.24.11, using the bundled packages \texttt{Divisor},
+\texttt{SymbolicPowers}, \texttt{Polyhedra}, \texttt{IntegralClosure},
+\texttt{MinimalPrimes} and \texttt{Elimination}. \texttt{Divisor} has
+since been renamed \texttt{WeilDivisors} and loading it under the old
+name now warns; the code has not yet been moved over. From the
+repository root:
 
 \begin{verbatim}
 M2 --script tests/run-tests.m2          # 13 regression tests, about 5 s

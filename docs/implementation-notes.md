@@ -114,11 +114,16 @@ happens to return, and that depends on the grading:
 | threefold of `examples/toric-flip-projective.m2` | via `s` | via `canonicalIdeal` |
 | --- | --- | --- |
 | graded by `l = (1,1,-1)` | `s = 1`, `I` in degree 3 | `I` in degree 1 |
-| graded by `l = (2,2,1)` | `s = y_3^11`, `I` in degree 30 | `I` in degree 2 |
+| graded by `l = (2,2,1)`, M2 1.24 + `Divisor` | `s = y_3^11`, `I` in degree 30 | `I` in degree 2 |
+| graded by `l = (2,2,1)`, M2 1.26 + `WeilDivisors` | `s = 1`, `I` in degree 8 | `I` in degree 2 |
 
-and in the second row the loop went from "unfinished after seventeen minutes" to
-0.05 seconds. The two gradings describe the same threefold, so all of that cost
-was an artefact of the choice of `s`.
+The two gradings describe the same threefold, so all of that cost is an artefact
+of the choice of `s`. Under M2 1.24 the second row went from "unfinished after
+seventeen minutes" to 0.05 seconds; under 1.26 the package returns a better
+representative and the penalty is milder, degree 8 against degree 2. **The size
+of the gap is a fact about a package version; that there is a gap is not.**
+Step 2 has no way to ask for a small representative and the embedding does, so
+the regression test asserts the gap rather than either set of degrees.
 
 The remaining freedom — which of several minimal-degree embeddings to take —
 still changes `I` and hence how large `m` has to be, and is not yet explored.
