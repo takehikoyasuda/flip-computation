@@ -117,7 +117,9 @@ the five steps are:
   form \(I = \sO_X(K_X - \divisor(s))\) and \(E\) with
   \(I = \sO_X(-E)\);
 \item
-  for \(m = 1!, 2!, 3!, \dots\);
+  for increasing \(m\), until one passes the test of Step 5 ---
+  termination guaranteed because every sufficiently divisible \(m\)
+  passes it;
 \item
   build \(Z^m = \Proj\, R[I^{(m)}t]\) and test Lemma 7.2 ---
   return \(Z^m\) at the first \(m\) that passes.
@@ -130,7 +132,7 @@ and \texttt{isS2Source}, and the loop is \texttt{computeFlip}.
 \subsection{Where the implementation departs from the
 paper}\label{where-the-implementation-departs-from-the-paper}
 
-Four departures matter mathematically. The first is a correction; the
+Three departures matter mathematically. The first is a correction; the
 others are reformulations that leave the answer alone and change the
 cost by orders of magnitude.
 \href{https://github.com/takehikoyasuda/flip-computation/blob/main/docs/implementation-notes.md}{\texttt{docs/implementation-notes.md}}
@@ -180,13 +182,21 @@ grading \(\ell = (2,2,1)\) that gives \(s = y_3^{11}\) and an
 seventeen minutes. The direct embedding gives generators of degree 2 and
 takes 0.05 s --- on the same threefold.
 
-\textbf{Every divisor of \(\texttt{MaxSteps}!\).} One \(m\) that works
-is as good as another, so what matters is finding a \emph{small} one,
-and the cost per iteration grows steeply: on the threefold below, 0.02 s
-at \(m=1\) against more than 600 s at \(m=12\). Trying every divisor of
-\(\texttt{MaxSteps}!\) in increasing order still contains
-\(1!, 2!, \dots\), so termination is unchanged, while filling the gaps
-is nearly free.
+One further choice is worth recording, though it is not a departure.
+Step 4 stops at the first \(m\) that passes, and termination rests on
+every sufficiently divisible \(m\) passing; \emph{which} \(m\) are tried
+on the way is left open. One \(m\) that works is as good as another, so
+what matters is reaching a small one, and the cost per iteration grows
+steeply: on the threefold below, 0.02 s at \(m = 1\) against more than
+600 s at \(m = 12\). The implementation takes every divisor of
+\(\texttt{MaxSteps}!\) in increasing order. That sequence contains
+\(1!, 2!, \dots, \texttt{MaxSteps}!\), so it is eventually sufficiently
+divisible and the guarantee is intact, while filling the gaps between
+the factorials costs almost nothing --- \(1,2,3,4,6,8\) together take
+8.5 s, against more than 600 s for \(m = 12\) alone. Enumerating every
+integer instead would have to run to \(\texttt{MaxSteps}!\) for the same
+guarantee: 24 iterations where 8 suffice, and the extra ones are the
+expensive, unlikely ones.
 
 \section{Environment and
 reproducibility}\label{environment-and-reproducibility}
