@@ -208,12 +208,12 @@ expensive, unlikely ones.
 reproducibility}\label{environment-and-reproducibility}
 
 Computed with Macaulay2 1.26.06 on macOS (Apple Silicon), and previously
-with 1.24.05 and 1.24.11, using the bundled packages \texttt{Divisor},
-\texttt{SymbolicPowers}, \texttt{Polyhedra}, \texttt{IntegralClosure},
-\texttt{MinimalPrimes} and \texttt{Elimination}. \texttt{Divisor} has
-since been renamed \texttt{WeilDivisors} and loading it under the old
-name now warns; the code has not yet been moved over. From the
-repository root:
+with 1.24.05 and 1.24.11, using the bundled packages
+\texttt{WeilDivisors}, \texttt{SymbolicPowers}, \texttt{Polyhedra},
+\texttt{IntegralClosure}, \texttt{MinimalPrimes} and
+\texttt{Elimination}. The first of these was called \texttt{Divisor}
+through 1.24, which is the name the measurements above are quoted
+against. From the repository root:
 
 \begin{verbatim}
 M2 --script tests/run-tests.m2          # 13 regression tests, about 5 s
@@ -665,9 +665,10 @@ above and in the implementation notes.
   system for research in algebraic geometry.
   \url{https://macaulay2.com/}
 \item
-  \textbf{Schwede, K., Smith, Z. et al.} The \texttt{Divisor} package
-  for Macaulay2. (Canonical divisors and divisorial ideals; used in
-  place of \texttt{SymbolicPowers}.)
+  \textbf{Schwede, K., Smith, Z. et al.} The \texttt{WeilDivisors}
+  package for Macaulay2, called \texttt{Divisor} through Macaulay2
+  1.24. (Canonical divisors and divisorial ideals; used in place of
+  \texttt{SymbolicPowers}.)
 \end{itemize}
 
 \end{document}

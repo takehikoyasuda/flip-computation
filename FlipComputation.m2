@@ -9,8 +9,9 @@ newPackage(
         }},
     Headline => "computing flips of threefolds",
     Keywords => {"Algebraic Geometry"},
+    HomePage => "https://github.com/takehikoyasuda/flip-computation",
     PackageImports => {
-        "Divisor", "SymbolicPowers", "MinimalPrimes", "IntegralClosure",
+        "WeilDivisors", "SymbolicPowers", "MinimalPrimes", "IntegralClosure",
         "Elimination", "Polyhedra"
         },
     AuxiliaryFiles => true,
@@ -242,7 +243,7 @@ TEST ///
 
   -- K_X comes out as -D_1 - D_3 in terms of the torus-invariant divisors; that
   -- is -sum D_i up to the principal divisor div(y_1) = D_2 + D_4, which
-  -- examples/toric-flip.m2 checks with the Divisor package.
+  -- examples/toric-flip.m2 checks with the WeilDivisors package.
   pairing = (h, v) -> sum apply(3, k -> h#k * v#k);
   Ds = apply(rayList, v -> trim ideal apply(
           select(toList(0 .. #HB-1), j -> pairing(HB#j, v) > 0), j -> R_j));

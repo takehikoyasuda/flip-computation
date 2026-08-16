@@ -17,9 +17,10 @@ Early development. The API is unstable.
 
 ## Requirements
 
-* Macaulay2 (tested with 1.24.05 and 1.24.11)
-* Bundled packages: `Divisor`, `SymbolicPowers`, `Polyhedra`,
-  `IntegralClosure`, `MinimalPrimes`, `Elimination`
+* Macaulay2 (tested with 1.24.05, 1.24.11 and 1.26.06)
+* Bundled packages: `WeilDivisors`, `SymbolicPowers`, `Polyhedra`,
+  `IntegralClosure`, `MinimalPrimes`, `Elimination`.  `WeilDivisors` was
+  called `Divisor` through 1.24.
 
 ## Usage
 

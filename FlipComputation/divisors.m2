@@ -3,12 +3,12 @@
 -- with its symbolic powers.
 --
 -- The option BaseIsProjective distinguishes X = Proj R (the paper) from
--- X = Spec R; it only controls whether the Divisor package is asked to work
+-- X = Spec R; it only controls whether the WeilDivisors package is asked to work
 -- with graded or with arbitrary data.
 
 -- Step 1.  K_X = sum n_i D_i, returned as a list of pairs {p_i, n_i} where p_i is
 -- the height-one prime of R defining D_i.  The canonical module is computed by
--- the Divisor package as Ext^t(R, omega) (Section 3).
+-- the WeilDivisors package as Ext^t(R, omega) (Section 3).
 canonicalDivisorData = method(Options => {BaseIsProjective => true})
 canonicalDivisorData Ring := o -> R -> (
     K := canonicalDivisor(R, IsGraded => o.BaseIsProjective);

@@ -32,7 +32,7 @@
 
 loadPackage("FlipComputation", FileName => "FlipComputation.m2", Reload => true);
 needsPackage "Polyhedra";
-needsPackage "Divisor";
+needsPackage "WeilDivisors";
 
 rayList = {{1,0,0}, {0,1,0}, {0,0,1}, {1,1,-2}};
 sigma = coneFromVData transpose matrix rayList;

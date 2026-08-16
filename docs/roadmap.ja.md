@@ -46,8 +46,9 @@ M2 --script tests/run-tests.m2      # "all tests passed" が出れば OK
 ```
 
 必要なのは Macaulay2 本体のみ（1.24.05、1.24.11、1.26.06 で確認）。使用パッケージ
-`Divisor`, `SymbolicPowers`, `MinimalPrimes`, `IntegralClosure`, `Elimination`,
-`Polyhedra` はすべて M2 同梱。
+`WeilDivisors`, `SymbolicPowers`, `MinimalPrimes`, `IntegralClosure`, `Elimination`,
+`Polyhedra` はすべて M2 同梱。`WeilDivisors` は 1.24 までは `Divisor` という名前だった
+（2026-08-16 に移行済み。旧名でも動くが警告が出る）。
 
 macOS + Homebrew の注意: `macaulay2 1.24.05` は `icu4c` 74 系にリンクしており、
 Homebrew の `icu4c` が 78 に上がると `libicudata.74.dylib not found` で起動しなく
@@ -535,3 +536,25 @@ X_proj = Proj k[y_1..y_5, w]/I  ⊂ P^5,  deg w = 1
 
 コールドビルドでは longtable が `Table widths have changed. Rerun LaTeX.` を出すため
 1回では収束しない。Makefile は2回走らせている。
+
+`make docs` でパッケージのマニュアル（HTML 57ページ）を `doc-build/` に生成し、URL を
+表示する。ブラウザのタブを開きっぱなしにして編集のたびに再読込する用。M2 は example
+ブロックをハッシュして入力が変わったものだけ再実行するので、散文だけ直したときは
+example が走らない。`make docs-all` は全部やり直す版。`IgnoreExampleErrors => false`
+にしてあるので、**動かなくなった example はビルドを落とす**（ログに書かれて誰も
+読まない、という状態にしない）。`doc-build/` は `.gitignore` 済み。
+
+### 7-4. 2026-08-16 に片付いたもの
+
+* **M2 1.26.06 でテスト #11 が落ちていた。** `Divisor` → `WeilDivisors` の改名に伴い
+  標準因子の代表元が変わり、`antiCanonicalSection` が `y_3^11` ではなく `1` を返す
+  ようになったため。テストを**次数の絶対値ではなく2経路の差**を見る形に直し、
+  根拠の数値を引用していた文書3箇所（ノート、`implementation-notes.md`、本ファイル）
+  を版に依存しない書き方に改めた。**departure 自体は依然として正当**（次数 8 対 2）。
+* **`WeilDivisors` へ移行した。** `PackageImports` と `examples/toric-flip.m2` の
+  `needsPackage`。API は同一で、テスト13件・例4本・マニュアル生成すべて無変更で通る。
+  改名警告は消えた。
+* **`installPackage` の警告がゼロになった。** 残っていた
+  `insufficient citation data: howpublished` は `HomePage` を足して解消。
+  DOI を取る際の BibTeX 生成にも効く。
+* **`make docs` / `docs-all` / `docs-clean` / `test` を追加**（Stein 側と揃えた）。
