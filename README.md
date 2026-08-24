@@ -94,8 +94,10 @@ next.
 ## Use of AI
 
 The code, the tests, and the technical note were written essentially by an AI
-system (Claude), with edits by the author.  The author has read them and believes
-them to be correct, but has not checked every detail.  The algorithm is the one
+system (Claude), with edits by the author.  ChatGPT was also used during
+development, mainly for design and algorithm discussion.  The author has read
+the AI-written material and believes them to be correct, but has not checked
+every detail.  The algorithm is the one
 in the paper above and nothing conceptually difficult is attempted here, and each
 example is checked automatically against independently known geometry — the
 triangulations of a circuit, the sign of `K.C` on the wall curve, determinants of
