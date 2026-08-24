@@ -1,23 +1,3 @@
-# Build the technical note.
-#
-# SOURCE_DATE_EPOCH and FORCE_SOURCE_DATE stop pdflatex from stamping the build
-# time into the file, so identical input gives a byte-identical PDF.  Without
-# them every rebuild produces a different file and shows up as a git change even
-# when nothing was edited -- and since a PDF is already compressed, git cannot
-# delta it, so each of those non-changes would cost a full copy in the history.
-#
-# Bump the date when the note is substantively revised; it is what the PDF
-# reports as its creation date.
-SOURCE_DATE_EPOCH := 1785542400		# 2026-08-01
-
-PDFLATEX = SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH) FORCE_SOURCE_DATE=1 \
-	   pdflatex -interaction=nonstopmode -halt-on-error
-
-# Twice: the first pass writes the cross-references, the second resolves them.
-IMPLEMENTATION.pdf: IMPLEMENTATION.tex
-	$(PDFLATEX) $<
-	$(PDFLATEX) $<
-
 # Build the package documentation and leave it at a fixed path, so that a
 # browser tab opened on it once can be reloaded after every edit.
 DOCDIR := doc-build
@@ -58,13 +38,9 @@ docs-all:
 test:
 	M2 --script tests/run-tests.m2
 
-clean:
-	rm -f IMPLEMENTATION.aux IMPLEMENTATION.log IMPLEMENTATION.out \
-	      IMPLEMENTATION.toc
-
 # Separate from clean, because $(DOCDIR) holds the cached example output that
 # makes `make docs` fast.  Removing it is a deliberate act, not housekeeping.
 docs-clean:
 	rm -rf $(DOCDIR)
 
-.PHONY: clean docs docs-all docs-clean test
+.PHONY: docs docs-all docs-clean test

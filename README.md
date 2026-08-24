@@ -65,46 +65,26 @@ cheap.
 | `FlipComputation/` | implementation split by topic |
 | `examples/` | worked examples |
 | `tests/` | regression tests |
-| `IMPLEMENTATION.tex`, `.pdf` | technical note: the construction, the examples, and what they verify |
 | `docs/` | notes relating the code to the paper, and the development plan |
 
-The technical note [IMPLEMENTATION.pdf](IMPLEMENTATION.pdf) describes the
-mathematics, the worked examples with their actual Macaulay2 output, and the
-independent checks that the answers are compared against.  It is written in
-LaTeX rather than markdown because GitHub's markdown renderer refuses
-`\newcommand`, `\operatorname`, `\mathbb`, `\mathcal` and `\tag`, and eats the
-backslash in `\,` and `\\`, which between them rule out macros, multi-line
-formulas and equation numbers.  Rebuild it with
-
-```
-make
-```
-
-The Makefile pins `SOURCE_DATE_EPOCH`, so pdflatex does not stamp the build time
-into the file and rebuilding an unedited source leaves the PDF byte-identical --
-without it every rebuild would show up as a git change, and since a PDF is
-already compressed, git cannot delta it and each such non-change would cost a
-full copy in the history.  Bump the date in the Makefile when the note is
-substantively revised.
-
+The worked examples and their actual Macaulay2 output are documented in the
+package manual (`viewHelp FlipComputation`, once installed).
 `docs/implementation-notes.md` gives the line-by-line correspondence with the
 paper and the measurements, and `docs/roadmap.ja.md` records what is planned
 next.
 
 ## Use of AI
 
-The code, the tests, and the technical note were written essentially by an AI
-system (Claude), with edits by the author.  ChatGPT was also used during
-development, mainly for design and algorithm discussion.  The author has read
-the AI-written material and believes them to be correct, but has not checked
-every detail.  The algorithm is the one
-in the paper above and nothing conceptually difficult is attempted here, and each
-example is checked automatically against independently known geometry — the
-triangulations of a circuit, the sign of `K.C` on the wall curve, determinants of
-cones, canonical classes of `P^3` and of a quadric threefold — so large errors are
-unlikely.  It is a research prototype, not verified software.  One error that had
-survived every existing test was in fact caught this way; see
-[IMPLEMENTATION.pdf](IMPLEMENTATION.pdf).
+The code and the tests were written essentially by an AI system (Claude), with
+edits by the author.  ChatGPT was also used during development, mainly for
+design and algorithm discussion.  The author has read the AI-written material
+and believes them to be correct, but has not checked every detail.  The
+algorithm is the one in the paper above and nothing conceptually difficult is
+attempted here, and each example is checked automatically against
+independently known geometry — the triangulations of a circuit, the sign of
+`K.C` on the wall curve, determinants of cones, canonical classes of `P^3` and
+of a quadric threefold — so large errors are unlikely.  It is a research
+prototype, not verified software.
 
 ## License
 
