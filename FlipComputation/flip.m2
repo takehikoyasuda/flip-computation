@@ -31,6 +31,11 @@ computeFlip = method(Options => {
         Verbose => true
         })
 computeFlip Ring := o -> R -> (
+    -- Validated before any work, so that a bad bound is reported even on the
+    -- inputs that never reach the loop (K_X linearly trivial, below).
+    if o.Multipliers === null
+        and (not instance(o.MaxMultiplier,ZZ) or o.MaxMultiplier < 1) then
+        error "computeFlip: MaxMultiplier must be a positive integer";
     (s, Edata) := flipDivisorData(R,
         AntiCanonicalSection => o.AntiCanonicalSection,
         BaseIsProjective => o.BaseIsProjective);
@@ -41,12 +46,24 @@ computeFlip Ring := o -> R -> (
         << "-- E has " << #Edata << " component(s) with multiplicities "
            << toString apply(Edata, pe -> pe#1) << endl;
         );
+    -- Step 3 of Algorithm 4 stops with the identity as soon as I^(m) has a
+    -- single minimal generator.  E = 0 is that case at m = 1: K_X is linearly
+    -- trivial, every I^(m) is the unit ideal, and the relative canonical model
+    -- is the identity of X.  (This is a flop, so there is no flip; the relative
+    -- canonical model exists all the same and is what is returned.)  For m > 1
+    -- no special case is needed: a principal I^(m) -- K_X torsion of order m --
+    -- makes the Rees algebra R[u], whose projection is already an isomorphism,
+    -- so the small and S_2 tests below accept it and the loop returns it.
+    if #Edata == 0 then (
+        if o.Verbose then << "-- K_X is linearly trivial, so the relative "
+            << "canonical model is the identity of X" << endl;
+        Pid := bigradedReesProjection(ideal 1_R,
+            BaseIsProjective => o.BaseIsProjective);
+        return if o.ReturnGraph
+            then b2mToGraphMorphism(Pid, Verbose => o.Verbose) else Pid;
+        );
     ms := if o.Multipliers =!= null then toList o.Multipliers
-        else (
-            if not instance(o.MaxMultiplier,ZZ) or o.MaxMultiplier < 1 then
-                error "computeFlip: MaxMultiplier must be a positive integer";
-            toList (1..o.MaxMultiplier)
-            );
+        else toList (1..o.MaxMultiplier);
     for m in ms do (
         if o.Verbose then << "-- m = " << m << ":" << endl;
         Im := divisorialIdeal(Edata, m);

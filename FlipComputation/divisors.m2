@@ -58,6 +58,14 @@ canonicalIdeal Ring := R -> (
 -- ideal of R, and -E is linearly equivalent to K_X because I is isomorphic to
 -- omega_X.  Returns the pair (s, {{p_i, e_i}, ...}) describing E, where s is the
 -- section used if one was, and null when the embedding route was taken.
+--
+-- An empty Edata means E = 0, that is K_X is linearly trivial.  Then every
+-- I^(m) is the unit ideal, so Step 3 of Algorithm 4 finds r = 1 at m = 1 and
+-- the relative canonical model is the identity; computeFlip reports that.  This
+-- used to be two hard errors here ("omega_X is free ... this is a flop" and "E
+-- is zero"), which is what v2 asked for -- there is indeed no flip in this case
+-- -- but the revised algorithm returns the identity rather than failing, so the
+-- caller is told instead of stopped.
 flipDivisorData = method(Options => {
         AntiCanonicalSection => null, BaseIsProjective => true})
 flipDivisorData Ring := o -> R -> (
@@ -65,17 +73,12 @@ flipDivisorData Ring := o -> R -> (
     s := o.AntiCanonicalSection;
     if s === null then (
         I := canonicalIdeal R;
-        if I == ideal 1_R then error(
-            "flipDivisorData: omega_X is free, so K_X is linearly trivial and "
-            | "there is no flip to compute (this is a flop)");
-        E = divisor I;
+        E = if I == ideal 1_R then 0*divisor(1_R) else divisor I;
         ) else (
         K := canonicalDivisor(R, IsGraded => o.BaseIsProjective);
         E = if s == 1_R then -K else divisor(s) - K;
         );
     Edata := select(apply(primes E, p -> {p, coefficient(p, E)}), pe -> pe#1 != 0);
-    if #Edata == 0 then error(
-        "flipDivisorData: E is zero, so there is no flip to compute");
     if any(Edata, pe -> pe#1 < 0) then error(
         "flipDivisorData: div(s) - K_X is not effective; "
         | "supply a different AntiCanonicalSection");

@@ -31,16 +31,16 @@ Key
   computeFlip
   (computeFlip, Ring)
 Headline
-  compute the flip of a flipping contraction
+  compute the relative canonical model of a birational contraction
 Usage
   P = computeFlip R
 Inputs
   R:Ring
-    the homogeneous coordinate ring of the target $X$ of a flipping contraction
+    the homogeneous coordinate ring of the target $X$ of the contraction
 Outputs
   P:B2MProjection
-    the flip $Z \to X$, as a B2M projection, or as a @TO GraphMorphism@ if
-    {\tt ReturnGraph => true}
+    the relative canonical model $Z \to X$, as a B2M projection, or as a
+    @TO GraphMorphism@ if {\tt ReturnGraph => true}
 Description
   Text
     This is Algorithm 4 of arXiv:2603.13703.  A canonical divisor
@@ -49,7 +49,15 @@ Description
     $R[I^{(m)}t]$ of the symbolic powers of $I = \mathcal{O}_X(K_X-\operatorname{div}(s))$
     are computed for increasing $m$ until the two conditions of Lemmas 6.6 and
     6.7 hold: $Z^m$ is normal and the exceptional locus of $Z^m \to X$ has
-    codimension at least two.
+    codimension at least two.  When the contraction is small, this $Z \to X$ is
+    its flip, which is the case the examples exhibit.
+
+    Step 3 stops with the identity of $X$ as soon as $I^{(m)}$ has a single
+    minimal generator.  At $m = 1$ that is $K_X$ linearly trivial, reported
+    before the loop starts; for $m > 1$ it is $K_X$ torsion of order $m$, and
+    needs nothing special, the Rees algebra then being $R[u]$ and its projection
+    already an isomorphism.  Either way the contraction is a flop, so there is
+    no flip, but the relative canonical model exists and is returned.
 
     With {\tt BaseIsProjective => false} the same algorithm is run over
     $X = \operatorname{Spec} R$; see @TO BaseIsProjective@.
@@ -62,6 +70,13 @@ Caveat
   the standard grading; over a weighted grading it is sufficient but not
   necessary, so the loop may try one more $m$ than it strictly has to. See
   @TO isS2Source@.
+
+  Lemma 6.6's test asks the projection to be small, so a relative canonical
+  model that is neither the identity nor small -- a divisorial one -- is never
+  accepted, and the loop instead runs out of multipliers and raises an error.
+  Raising @TO MaxMultiplier@ cannot help in that case.  {\tt MMPComputation}'s
+  {\tt relativeCanonicalModelFromBaseData} turns this into an inconclusive
+  result rather than an error.
 SeeAlso
   BaseIsProjective
   bigradedReesProjection
@@ -704,13 +719,18 @@ Description
 
     $E$ is effective because $I$ is an ideal of $R$, and $-E$ is linearly
     equivalent to $K_X$ because $I$ is isomorphic to $\omega_X$.
+    An empty list of pairs means $E = 0$, that is, $K_X$ is linearly trivial.
+    Every $I^{(m)}$ is then the unit ideal, so Step 3 finds $r = 1$ at $m = 1$
+    and the relative canonical model is the identity of $X$; @TO computeFlip@
+    returns it.  The contraction is a flop in that case, so there is no flip,
+    but the relative canonical model exists all the same.
 Caveat
-  An error is raised when $\omega_X$ is free, since $K_X$ is then linearly
-  trivial and the contraction is a flop rather than a flip, and when $E$ turns
-  out not to be effective.
+  An error is raised when $E$ turns out not to be effective, which can only
+  happen on the {\tt AntiCanonicalSection} route.
 SeeAlso
   canonicalIdeal
   divisorialIdeal
+  computeFlip
 ///
 
 doc ///

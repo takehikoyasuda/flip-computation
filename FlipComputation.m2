@@ -219,6 +219,28 @@ TEST ///
       Verbose => false); false) else true);
 ///
 
+-- Step 3 of Algorithm 4 returns the identity when I^(m) is principal.  On the
+-- ODP omega_X is free, so that happens at m = 1, before the loop: E = 0, every
+-- I^(m) is the unit ideal, and the Rees algebra R[u] has P^0 fibers, so the
+-- projection is an isomorphism.  v2 had no such case and this used to be a
+-- hard error ("this is a flop"); the contraction is indeed a flop, so there is
+-- no flip, but the relative canonical model is the identity.
+TEST ///
+  R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+  assert(canonicalIdeal R == ideal 1_R);
+  (s, Edata) = flipDivisorData R;
+  assert(#Edata == 0);
+  P = computeFlip(R, BaseIsProjective => false, Verbose => false);
+  assert(instance(P, B2MProjection));
+  assert(#(P#fiberVariables) == 1);
+  assert(geometricDimension P == dim R);
+  assert(isSmallProjection(P, Verbose => false));
+  assert(isS2Source P);
+  -- and as a graph morphism over a projective base
+  G = computeFlip(R, ReturnGraph => true, Verbose => false);
+  assert(instance(G, GraphMorphism));
+///
+
 -- On a small projection R1 comes for free, so normality reduces to S2.  Check
 -- the cheap test against the full one where the full one is still affordable.
 TEST ///
