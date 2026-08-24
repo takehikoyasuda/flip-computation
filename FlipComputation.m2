@@ -125,7 +125,7 @@ TEST ///
   assert(#segreHilbertBasis({1,1},{1,2}) == 5);
 ///
 
--- Transforming the B2M projection above into a graph morphism preserves the
+-- Transforming the bi-to-mono projection above into a graph morphism preserves the
 -- dimension of the source.
 TEST ///
   R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);

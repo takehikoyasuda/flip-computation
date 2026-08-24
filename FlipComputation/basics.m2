@@ -3,10 +3,11 @@
 -- Following Section 2 of the paper, a monograded variety is represented by its
 -- homogeneous coordinate ring R = k[x]/I, and a bigraded variety by its
 -- bihomogeneous coordinate ring k[y,x]/J, where deg(y_j) = (d_j,0) and
--- deg(x_i) = (a_i,c_i).  A bi-to-mono projection -- B2M throughout this
--- package, which predates the paper's current name for it -- is a bigraded
--- variety together with the projection to the monograded variety Proj R
--- (Definition 2.8).
+-- deg(x_i) = (a_i,c_i).  A bi-to-mono projection is a bigraded variety
+-- together with the projection to the monograded variety Proj R (Definition
+-- 2.8).  The type is named B2MProjection after an abbreviation this package
+-- used before the paper settled on bi-to-mono; the name is kept because it is
+-- exported, but nothing else says B2M.
 --
 -- As an extension beyond the scope of the paper we also allow an affine base:
 -- then R is an arbitrary affine ring, X = Spec R, and Z sits in P^(r-1) x X,
@@ -33,7 +34,7 @@ geometricDimension = method()
 geometricDimension B2MProjection := P -> dim(P#totalRing) - coneCorrection P
 
 net B2MProjection := P -> (
-    "B2M projection Z --> X,  Z subset P^" | toString(#(P#fiberVariables) - 1)
+    "bi-to-mono projection Z --> X,  Z subset P^" | toString(#(P#fiberVariables) - 1)
     | " x X,  X = " | (if isProjectiveBase P then "Proj" else "Spec")
     | " R,  dim Z = " | toString geometricDimension P
     )

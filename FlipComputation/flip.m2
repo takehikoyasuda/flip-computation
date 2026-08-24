@@ -3,7 +3,7 @@
 -- Input: the homogeneous coordinate ring R of the target X of a projective
 -- birational contraction f : Y --> X with f_* O_Y = O_X and -K_Y f-ample.
 -- f is not assumed small.
--- Output: the relative canonical model g : Z --> X, as a B2M projection or
+-- Output: the relative canonical model g : Z --> X, as a bi-to-mono projection or
 -- as a graph morphism.
 --
 -- Steps 1-3 are carried out by antiCanonicalDivisorData (see divisors.m2).

@@ -1,4 +1,4 @@
--- Sections 2.4 and 2.5: the w-diagonal and the passage from a B2M projection to a
+-- Sections 2.4 and 2.5: the w-diagonal and the passage from a bi-to-mono projection to a
 -- graph morphism of monograded varieties.
 
 -- Hilbert basis of the monoid
@@ -26,7 +26,7 @@ segreProductRing (Ring, List, List) := (kk, ds, cs) -> (
     )
 
 -- Choose an integral diagonal strictly inside the grading chamber of a
--- projective B2M projection.  If deg(u_j)=(p_j,e_j), deg(x_i)=(0,c_i), and
+-- projective bi-to-mono projection.  If deg(u_j)=(p_j,e_j), deg(x_i)=(0,c_i), and
 -- D>max(e_j/p_j), then a monomial u^b*x^a lies on the diagonal (n,Dn) exactly
 -- when
 --
@@ -69,7 +69,7 @@ b2mDiagonalData B2MProjection := P -> (
         }
     )
 
--- Lemma 2.10.  Given a strict B2M projection Z --> X with Z contained in Y x X,
+-- Lemma 2.10.  Given a strict bi-to-mono projection Z --> X with Z contained in Y x X,
 -- we present Z as a monograded variety W (via the Segre isomorphism) and compute
 -- the graph of the induced morphism W --> X as a bigraded variety in W x X.
 --

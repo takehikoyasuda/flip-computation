@@ -87,7 +87,7 @@ Inputs
     the homogeneous coordinate ring of the target $X$ of the contraction
 Outputs
   P:B2MProjection
-    the relative canonical model $Z \to X$, as a B2M projection, or as a
+    the relative canonical model $Z \to X$, as a bi-to-mono projection, or as a
     @TO GraphMorphism@ if {\tt ReturnGraph => true}
 Description
   Text
@@ -161,7 +161,7 @@ Key
   bigradedReesProjection
   (bigradedReesProjection, Ideal)
 Headline
-  the B2M projection given by the Rees algebra of an ideal
+  the bi-to-mono projection given by the Rees algebra of an ideal
 Usage
   P = bigradedReesProjection J
 Inputs
@@ -205,7 +205,7 @@ doc ///
 Key
   BaseIsProjective
 Headline
-  whether the base of a B2M projection is Proj R or Spec R
+  whether the base of a bi-to-mono projection is Proj R or Spec R
 Description
   Text
     The paper works throughout with $X = \operatorname{Proj} R$ for a graded ring
@@ -418,7 +418,7 @@ Key
   b2mDiagonalData
   (b2mDiagonalData, B2MProjection)
 Headline
-  choose a positive diagonal for a projective B2M projection
+  choose a positive diagonal for a projective bi-to-mono projection
 Usage
   data = b2mDiagonalData P
 Inputs
@@ -446,7 +446,7 @@ Key
   b2mToGraphMorphism
   (b2mToGraphMorphism, B2MProjection)
 Headline
-  transform a B2M projection into a graph morphism
+  transform a bi-to-mono projection into a graph morphism
 Usage
   G = b2mToGraphMorphism P
 Inputs
@@ -481,8 +481,9 @@ Headline
   a bigraded variety together with its projection to a monograded variety
 Description
   Text
-    Definition 2.8 of arXiv:2603.13703, where it is called a bi-to-mono
-    projection; B2M is this package's own older name for it.  The source $Z$
+    Definition 2.8 of arXiv:2603.13703, which calls it a bi-to-mono
+    projection; the type keeps the abbreviation this package used before the
+    paper settled on that name, since it is exported.  The source $Z$
     is a bigraded variety
     sitting in $\mathbb{P}^{r-1} \times X$, the base $X$ is the monograded
     variety $\operatorname{Proj} R$, and the projection $\pi : Z \to X$ is the
@@ -552,7 +553,7 @@ doc ///
 Key
   ambientRing
 Headline
-  the bigraded polynomial ring a B2M projection lives in
+  the bigraded polynomial ring a bi-to-mono projection lives in
 Description
   Text
     The ring $k[u_1,\dots,u_r,x_0,\dots,x_n]$, bigraded so that the relations of
