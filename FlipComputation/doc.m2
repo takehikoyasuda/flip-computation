@@ -324,7 +324,7 @@ Description
     Reports that $\pi$ is small exactly when no codimension-one component of
     $V(J\mathcal{O}_Z)$ is contracted, $J$ being the blown up ideal.
 
-    That is equivalent to $\operatorname{codim}\operatorname{Exc}(\pi) \ge 2$.
+    That is equivalent to $\operatorname{codim}\mathrm{Exc}(\pi) \ge 2$.
     The exceptional locus is contained in $V(J\mathcal{O}_Z)$, since the blowup
     is an isomorphism wherever $J$ is invertible and $J$ is invertible outside
     $V(J)$. Now $J\mathcal{O}_Z$ is invertible by construction, so
@@ -364,7 +364,7 @@ Description
   Text
     For a {\em small} projection this is all that has to be checked in order to
     know that $Z$ is normal. A point $z$ of $Z$ of codimension one cannot lie in
-    $\operatorname{Exc}(\pi)$, which has codimension at least two, so $\pi$ is a
+    $\mathrm{Exc}(\pi)$, which has codimension at least two, so $\pi$ is a
     local isomorphism at $z$ and $\mathcal{O}_{Z,z}$ is the local ring of $X$ at
     a point of codimension one, hence a discrete valuation ring. A small
     projection therefore satisfies $R_1$ for free.
