@@ -100,13 +100,18 @@ make docs
 `make docs` reruns only the examples whose input changed; `make docs-all`
 rebuilds everything.  Both fail if an example stops working.
 
-There is deliberately no hosted copy.  Macaulay2 generates these pages for a
-local installation, with the stylesheet, the KaTeX scripts that render the
+It is also published, rebuilt from source on every push to `main`:
+
+**<https://takehikoyasuda.github.io/flip-computation/>**
+
+The generated html cannot simply be uploaded.  Macaulay2 writes these pages for
+a local installation, with the stylesheet, the KaTeX scripts that render the
 mathematics, and every link to a core Macaulay2 node given as absolute paths
 into the M2 installation directory; served from anywhere else they come out
-unstyled with dead links.  A package's documentation becomes browsable online
-by being accepted into the Macaulay2 distribution, which is a separate step
-this prototype has not taken.
+unstyled with dead links.  [`.github/make-site.sh`](.github/make-site.sh)
+repairs that and adds a banner to every page saying this package is not part of
+the Macaulay2 distribution, which is how a package's documentation would
+otherwise come to be online.
 
 `docs/implementation-notes.md` gives the line-by-line correspondence with the
 paper and the measurements, and `docs/roadmap.ja.md` records what is planned
