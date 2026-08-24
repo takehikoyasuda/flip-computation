@@ -6,6 +6,12 @@ models described in Section 6 of
 > T. Yasuda, *An algorithm for the minimal model program in dimension three*,
 > [arXiv:2603.13703](https://arxiv.org/abs/2603.13703).
 
+### 📖 [Read the manual](https://takehikoyasuda.github.io/flip-computation/)
+
+Every function, type and field is documented with a worked example, run by
+Macaulay2 with its real output shown, so what the package computes can be read
+without installing anything.
+
 The package implements Algorithm 4 (Computing the relative canonical model) of
 that paper, together with the auxiliary constructions from Sections 2.4--2.5
 (the `w`-diagonal, bi-to-mono projections and graph morphisms) that the
