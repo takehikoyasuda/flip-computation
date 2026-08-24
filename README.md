@@ -88,7 +88,26 @@ cheap.
 | `docs/` | notes relating the code to the paper, and the development plan |
 
 The worked examples and their actual Macaulay2 output are documented in the
-package manual (`viewHelp FlipComputation`, once installed).
+package manual.  Its front page groups the functions the way this README's
+sections do, and every function, type and field has a runnable example.  Read
+it with `viewHelp FlipComputation` once the package is installed, or build the
+html without installing and open the printed `file://` link:
+
+```
+make docs
+```
+
+`make docs` reruns only the examples whose input changed; `make docs-all`
+rebuilds everything.  Both fail if an example stops working.
+
+There is deliberately no hosted copy.  Macaulay2 generates these pages for a
+local installation, with the stylesheet, the KaTeX scripts that render the
+mathematics, and every link to a core Macaulay2 node given as absolute paths
+into the M2 installation directory; served from anywhere else they come out
+unstyled with dead links.  A package's documentation becomes browsable online
+by being accepted into the Macaulay2 distribution, which is a separate step
+this prototype has not taken.
+
 `docs/implementation-notes.md` gives the line-by-line correspondence with the
 paper and the measurements, and `docs/roadmap.ja.md` records what is planned
 next.
