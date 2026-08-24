@@ -61,14 +61,15 @@ canonicalIdeal Ring := R -> (
 --
 -- An empty Edata means E = 0, that is K_X is linearly trivial.  Then every
 -- I^(m) is the unit ideal, so Step 3 of Algorithm 4 finds r = 1 at m = 1 and
--- the relative canonical model is the identity; computeFlip reports that.  This
+-- the relative canonical model is the identity, which
+-- computeRelativeCanonicalModel reports.  This
 -- used to be two hard errors here ("omega_X is free ... this is a flop" and "E
 -- is zero"), which is what v2 asked for -- there is indeed no flip in this case
 -- -- but the revised algorithm returns the identity rather than failing, so the
 -- caller is told instead of stopped.
-flipDivisorData = method(Options => {
+antiCanonicalDivisorData = method(Options => {
         AntiCanonicalSection => null, BaseIsProjective => true})
-flipDivisorData Ring := o -> R -> (
+antiCanonicalDivisorData Ring := o -> R -> (
     local E;
     s := o.AntiCanonicalSection;
     if s === null then (
@@ -80,7 +81,7 @@ flipDivisorData Ring := o -> R -> (
         );
     Edata := select(apply(primes E, p -> {p, coefficient(p, E)}), pe -> pe#1 != 0);
     if any(Edata, pe -> pe#1 < 0) then error(
-        "flipDivisorData: div(s) - K_X is not effective; "
+        "antiCanonicalDivisorData: div(s) - K_X is not effective; "
         | "supply a different AntiCanonicalSection");
     (s, Edata)
     )

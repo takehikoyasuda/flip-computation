@@ -18,6 +18,13 @@
 > Algorithm 4 自身が $m=1,2,3,\dots$ を列挙するため、約数列を経由する理由が
 > 消えたからである（約数列は 5,7,9,… を飛ばすため不利でもあった）。現在は
 > `MaxMultiplier`（既定 24）までの連番を試す。
+>
+> 関数名も変わった。`computeFlip` は `computeRelativeCanonicalModel`、
+> `flipDivisorData` は `antiCanonicalDivisorData` である。「flip」は狭義には
+> 相対Picard数1かつ small な縮約に対して使われる語で、このパッケージが返すもの
+> （identity を含み、Picard数を一切計算しない）より狭いため改めた。パッケージ名
+> `FlipComputation` とリポジトリ名は、論文 Remark 6.12 が URL を挙げているので
+> 維持する。
 
 ## 1. 現状
 

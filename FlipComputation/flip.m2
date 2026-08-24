@@ -1,12 +1,14 @@
 -- Algorithm 4: computing the relative canonical model.
 --
--- Input: the homogeneous coordinate ring R of the target X of a flipping
--- contraction f : Y --> X.
--- Output: the flip g : Z --> X, as a B2M projection or as a graph morphism.
+-- Input: the homogeneous coordinate ring R of the target X of a projective
+-- birational contraction f : Y --> X with f_* O_Y = O_X and -K_Y f-ample.
+-- f is not assumed small.
+-- Output: the relative canonical model g : Z --> X, as a B2M projection or
+-- as a graph morphism.
 --
--- Steps 1-3 are carried out by flipDivisorData (see divisors.m2).  Steps 4-5
--- loop over m = 1, 2, 3, ..., computing the Rees algebra R[I^(m)t] and testing
--- the two conditions of Lemmas 6.6 and 6.7.
+-- Steps 1-3 are carried out by antiCanonicalDivisorData (see divisors.m2).
+-- Steps 4-5 loop over m = 1, 2, 3, ..., computing the Rees algebra R[I^(m)t]
+-- and testing the two conditions of Lemmas 6.6 and 6.7.
 --
 -- The multipliers are tried in the order the paper's Algorithm 4 states, m = 1,
 -- 2, 3, ..., up to MaxMultiplier.  Finding a small m is what matters, because
@@ -22,7 +24,7 @@
 -- carries no divisibility condition on m, so that detour is no longer needed --
 -- and it was skipping values (5, 7, 9, ...) at which a cheap answer could have
 -- been found, only to pay for a much larger m afterwards.
-computeFlip = method(Options => {
+computeRelativeCanonicalModel = method(Options => {
         AntiCanonicalSection => null,
         Multipliers => null,
         MaxMultiplier => 24,
@@ -30,13 +32,13 @@ computeFlip = method(Options => {
         BaseIsProjective => true,
         Verbose => true
         })
-computeFlip Ring := o -> R -> (
+computeRelativeCanonicalModel Ring := o -> R -> (
     -- Validated before any work, so that a bad bound is reported even on the
     -- inputs that never reach the loop (K_X linearly trivial, below).
     if o.Multipliers === null
         and (not instance(o.MaxMultiplier,ZZ) or o.MaxMultiplier < 1) then
-        error "computeFlip: MaxMultiplier must be a positive integer";
-    (s, Edata) := flipDivisorData(R,
+        error "computeRelativeCanonicalModel: MaxMultiplier must be a positive integer";
+    (s, Edata) := antiCanonicalDivisorData(R,
         AntiCanonicalSection => o.AntiCanonicalSection,
         BaseIsProjective => o.BaseIsProjective);
     if o.Verbose then (
@@ -82,10 +84,11 @@ computeFlip Ring := o -> R -> (
             if o.Verbose then << "--   Z^m is not S2, hence not normal" << endl;
             continue;
             );
-        if o.Verbose then << "-- the flip is obtained for m = " << m << endl;
+        if o.Verbose then << "-- the relative canonical model is obtained for "
+            << "m = " << m << endl;
         return if o.ReturnGraph then b2mToGraphMorphism(P, Verbose => o.Verbose) else P;
         );
-    error("computeFlip: none of the multipliers " | toString ms
+    error("computeRelativeCanonicalModel: none of the multipliers " | toString ms
         | " produced the relative canonical model; increase MaxMultiplier or "
         | "supply Multipliers")
     )

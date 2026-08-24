@@ -41,7 +41,7 @@ R = S/ker map(L, S, apply(HB, mono));
     pn -> (pn#1, first entries gens pn#0)) << endl;
 
 -- The loop over m actually runs here: m = 1 is rejected, m = 2 succeeds.
-P = computeFlip(R, BaseIsProjective => false, Multipliers => {1,2});
+P = computeRelativeCanonicalModel(R, BaseIsProjective => false, Multipliers => {1,2});
 << endl << P << endl;
 << "I^(2) = " << P#blownUpIdeal << endl;
 

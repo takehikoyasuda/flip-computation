@@ -10,9 +10,23 @@ The package implements Algorithm 4 (Computing the relative canonical model) of
 that paper, together with the auxiliary constructions from Sections 2.4--2.5
 (the `w`-diagonal, bi-to-mono projections and graph morphisms) that the
 algorithm needs in order to return its output as a graph morphism of
-monograded varieties.  When the contraction it is applied to is small, the
-relative canonical model is the flip of that contraction, which is the case
-the worked examples below exhibit.
+monograded varieties.
+
+When the contraction it is applied to is small, the relative canonical model is
+the flip of that contraction, which is the case the worked examples below
+exhibit.  "Flip" here is meant in the sense of Fujino, *Foundations of the
+minimal model program*, Definition 4.8.2 and Lemma 4.8.3, which Remark 6.5 of
+the paper cites precisely because neither makes any hypothesis on the relative
+Picard number. It is **not** the narrower sense in which a flip is elementary,
+or extremal, of relative Picard number one: the contractions this program
+produces can belong to extremal faces of any dimension, and nothing here
+computes a Picard number or a Mori cone. The entry point is therefore
+`computeRelativeCanonicalModel`, not `computeFlip`.
+
+The package and the repository keep the name they were published under: the
+paper's Remark 6.12 gives this repository's URL, so renaming it would break
+that citation. What the paper calls this implementation there is "one for
+relative canonical models", which is what the API now says too.
 
 Numbered results are cited by their v3 numbering throughout; earlier versions
 number some of them differently, and v2 places this material in Section 7.

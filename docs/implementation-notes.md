@@ -18,8 +18,8 @@ Section 2 results differently.
 | Section 3, canonical divisor | `canonicalDivisorData` (`divisors.m2`), via `WeilDivisors::canonicalDivisor` |
 | Alg. 4, Step 1 | `canonicalDivisorData` |
 | Alg. 4, Step 2 | `antiCanonicalSection`, but see "Choice of s" below |
-| Alg. 4, Step 3 | `flipDivisorData`, `divisorialIdeal` |
-| Alg. 4, Steps 4–5 | `computeFlip` (`flip.m2`), `bigradedReesProjection` (`rees.m2`) |
+| Alg. 4, Step 3 | `antiCanonicalDivisorData`, `divisorialIdeal` |
+| Alg. 4, Steps 4–5 | `computeRelativeCanonicalModel` (`flip.m2`), `bigradedReesProjection` (`rees.m2`) |
 | Lemma 6.6, the `S_2` hypothesis | `isNormalSource` |
 | Lemma 6.7, exceptional locus | `isSmallProjection` |
 | — (outside the paper) | affine base, `BaseIsProjective => false` |
@@ -75,8 +75,9 @@ implemented by `b2mDiagonalData` and restores `b2mToGraphMorphism` for skew
 projective fibre blocks. In the weighted toric regression the degrees
 `(1,0),(1,1)` give `D=2` and transformed weights `2,1`.
 
-**Normality test.** `computeFlip` tests the two conditions of Lemmas 6.6 and 6.7 in the
-order "exceptional locus, then normality", and tests normality as `S2` alone
+**Normality test.** `computeRelativeCanonicalModel` tests the two conditions of
+Lemmas 6.6 and 6.7 in the order "exceptional locus, then normality", and tests
+normality as `S2` alone
 (`isS2Source`). See "Normality is only S2" below. `isNormalSource`, the full
 test on the affine cone over `Z^m`, is still exported but no longer used by the
 algorithm.
@@ -112,7 +113,8 @@ the answer is whether it is contracted. The test is kept as a safety net.
 **Choice of s.** Steps 2 and 3 together amount to embedding `omega_X` into `R`
 as an ideal: the ideal `I = O_X(K_X - div(s))` of Step 3 is isomorphic to
 `omega_X`, and every ideal isomorphic to `omega_X` arises this way. Rather than
-choosing `s` and then forming the ideal, `flipDivisorData` looks directly for
+choosing `s` and then forming the ideal, `antiCanonicalDivisorData` looks
+directly for
 the embedding of least degree — a nonzero homomorphism `omega_X -> R` of least
 degree, which `canonicalIdeal` computes as a minimal-degree generator of
 `Hom(omega_X, R)`. Passing `AntiCanonicalSection => s` uses the paper's
@@ -158,7 +160,7 @@ The two agree; `SymbolicPowers` grows steeply while the other is flat in `m`.
 `SymbolicPowers` slower still: 5.2 s at `m = 8`.)
 
 **Schedule of m.** Algorithm 4 runs over `m = 1, 2, 3, ...`, and that is what
-`computeFlip` does, up to `MaxMultiplier` (default 24).
+`computeRelativeCanonicalModel` does, up to `MaxMultiplier` (default 24).
 One `m` that works
 is as good as another, so what matters is finding a *small* one: the cost of an
 iteration grows very steeply in `m`, because the number of generators of `I^(m)`
@@ -312,7 +314,8 @@ regular in codimension one as soon as the projection is small, and normality of
 `Z` reduces to `S2`.
 
 `isS2Source` therefore tests only the `S2` half of Serre's criterion, and
-`computeFlip` runs `isSmallProjection` first so that the reduction applies.
+`computeRelativeCanonicalModel` runs `isSmallProjection` first so that the
+reduction applies.
 
 **S2 for `Z`, not for the cone.** The criterion `isNormal` uses internally is
 that `codim Ext^j(A,S) >= j+2` for every `j > codim I`, and the locus where it

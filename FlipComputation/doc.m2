@@ -2,7 +2,7 @@ doc ///
 Key
   FlipComputation
 Headline
-  computing flips of threefolds
+  computing relative canonical models of threefolds
 Description
   Text
     This package implements Algorithm 4 (Computing the relative canonical model) of
@@ -28,12 +28,12 @@ Description
 
 doc ///
 Key
-  computeFlip
-  (computeFlip, Ring)
+  computeRelativeCanonicalModel
+  (computeRelativeCanonicalModel, Ring)
 Headline
   compute the relative canonical model of a birational contraction
 Usage
-  P = computeFlip R
+  P = computeRelativeCanonicalModel R
 Inputs
   R:Ring
     the homogeneous coordinate ring of the target $X$ of the contraction
@@ -49,8 +49,17 @@ Description
     $R[I^{(m)}t]$ of the symbolic powers of $I = \mathcal{O}_X(K_X-\operatorname{div}(s))$
     are computed for increasing $m$ until the two conditions of Lemmas 6.6 and
     6.7 hold: $Z^m$ is normal and the exceptional locus of $Z^m \to X$ has
-    codimension at least two.  When the contraction is small, this $Z \to X$ is
-    its flip, which is the case the examples exhibit.
+    codimension at least two.
+
+    When the contraction is small, this $Z \to X$ is its flip, which is the
+    case the examples exhibit.  "Flip" is meant in the sense of Fujino,
+    {\em Foundations of the minimal model program}, Definition 4.8.2 and Lemma
+    4.8.3, which Remark 6.5 of the paper cites precisely because neither makes
+    any hypothesis on the relative Picard number.  It is {\em not} the narrower
+    sense in which a flip is elementary, or extremal, of relative Picard number
+    one: the contractions this program produces can belong to extremal faces of
+    any dimension, and nothing here computes a Picard number or a Mori cone.
+    That is why this function is no longer called {\tt computeFlip}.
 
     Step 3 stops with the identity of $X$ as soon as $I^{(m)}$ has a single
     minimal generator.  At $m = 1$ that is $K_X$ linearly trivial, reported
@@ -131,7 +140,8 @@ Description
   Text
     The paper works throughout with $X = \operatorname{Proj} R$ for a graded ring
     $R$, which is the default.  Passing {\tt BaseIsProjective => false} to
-    @TO computeFlip@ or @TO bigradedReesProjection@ makes them work with
+    @TO computeRelativeCanonicalModel@ or @TO bigradedReesProjection@ makes them
+    work with
     $X = \operatorname{Spec} R$ for an arbitrary affine ring $R$.  The source $Z$
     then still sits in $\mathbf{P}^{r-1} \times X$, cut out by an ideal
     homogeneous in the fiber variables alone, so only the cone over the base
@@ -204,7 +214,7 @@ Description
     2 and takes a twentieth of a second.
 SeeAlso
   antiCanonicalSection
-  flipDivisorData
+  antiCanonicalDivisorData
 ///
 
 doc ///
@@ -293,7 +303,7 @@ Caveat
   correctness: a sufficiently factorial $m$ makes
   $A = \bigoplus_k \mathcal{O}_X(-kmE)$, a divisorial algebra over a normal ring
   and hence normal, so the test is certain to fire by then. At worst
-  @TO computeFlip@ tries one more $m$ than strictly necessary.
+  @TO computeRelativeCanonicalModel@ tries one more $m$ than strictly necessary.
 SeeAlso
   isNormalSource
   isSmallProjection
@@ -359,7 +369,7 @@ Description
     sitting in $\mathbf{P}^{r-1} \times X$, the base $X$ is the monograded
     variety $\operatorname{Proj} R$, and the projection $\pi : Z \to X$ is the
     restriction of the second projection.  This is the form in which
-    @TO computeFlip@ returns its relative canonical model.
+    @TO computeRelativeCanonicalModel@ returns its relative canonical model.
 
     As an extension beyond the scope of the paper the base may instead be
     $\operatorname{Spec} R$; see @TO BaseIsProjective@ and @TO isProjectiveBase@.
@@ -388,7 +398,7 @@ Description
 SeeAlso
   GraphMorphism
   bigradedReesProjection
-  computeFlip
+  computeRelativeCanonicalModel
 ///
 
 doc ///
@@ -401,7 +411,8 @@ Description
     Section 2.5 of arXiv:2603.13703.  A morphism $W \to X$ of monograded
     varieties is recorded as its graph inside $W \times X$, which is a bigraded
     variety.  @TO b2mToGraphMorphism@ produces one from a @TO B2MProjection@,
-    and @TO computeFlip@ returns one when {\tt ReturnGraph => true}.
+    and @TO computeRelativeCanonicalModel@ returns one when
+    {\tt ReturnGraph => true}.
 
     The keys are @TO ambientRing@, @TO definingIdeal@, @TO totalRing@,
     @TO sourceRing@, @TO baseCoordinateRing@, @TO fiberVariables@,
@@ -656,11 +667,11 @@ Description
 Caveat
   Which representative of the canonical class comes back depends on the grading,
   and over a weighted grading it can be a bad one; that is the reason
-  @TO flipDivisorData@ prefers @TO canonicalIdeal@ to the route through
+  @TO antiCanonicalDivisorData@ prefers @TO canonicalIdeal@ to the route through
   @TO antiCanonicalSection@.
 SeeAlso
   antiCanonicalSection
-  flipDivisorData
+  antiCanonicalDivisorData
 ///
 
 doc ///
@@ -687,7 +698,8 @@ Description
     the unit ideal and $s = 1$.
 Caveat
   This is the paper's construction and it is kept for that reason, but it is not
-  what @TO flipDivisorData@ does by default.  The $s$ produced here inherits
+  what @TO antiCanonicalDivisorData@ does by default.  The $s$ produced here
+  inherits
   whatever representative of $K_X$ the {\tt WeilDivisors} package returns; over a
   weighted grading that can force $I^{(m)}$ into an enormous degree, and the
   computation becomes hopeless.  See @TO canonicalIdeal@.
@@ -698,12 +710,12 @@ SeeAlso
 
 doc ///
 Key
-  flipDivisorData
-  (flipDivisorData, Ring)
+  antiCanonicalDivisorData
+  (antiCanonicalDivisorData, Ring)
 Headline
   the divisor E with I = O_X(-E) isomorphic to omega_X
 Usage
-  (s, Edata) = flipDivisorData R
+  (s, Edata) = antiCanonicalDivisorData R
 Inputs
   R:Ring
 Outputs
@@ -721,7 +733,8 @@ Description
     equivalent to $K_X$ because $I$ is isomorphic to $\omega_X$.
     An empty list of pairs means $E = 0$, that is, $K_X$ is linearly trivial.
     Every $I^{(m)}$ is then the unit ideal, so Step 3 finds $r = 1$ at $m = 1$
-    and the relative canonical model is the identity of $X$; @TO computeFlip@
+    and the relative canonical model is the identity of $X$;
+    @TO computeRelativeCanonicalModel@
     returns it.  The contraction is a flop in that case, so there is no flip,
     but the relative canonical model exists all the same.
 Caveat
@@ -730,7 +743,7 @@ Caveat
 SeeAlso
   canonicalIdeal
   divisorialIdeal
-  computeFlip
+  computeRelativeCanonicalModel
 ///
 
 doc ///
@@ -743,7 +756,7 @@ Usage
   Im = divisorialIdeal(Edata, m)
 Inputs
   Edata:List
-    the second component of the output of @TO flipDivisorData@
+    the second component of the output of @TO antiCanonicalDivisorData@
   m:ZZ
 Outputs
   Im:Ideal
@@ -758,7 +771,7 @@ Description
     example takes about 0.006 seconds and is essentially flat in $m$.  The two
     agree.
 SeeAlso
-  flipDivisorData
+  antiCanonicalDivisorData
 ///
 
 doc ///
@@ -805,7 +818,8 @@ Description
     example the $S_2$ half took 0.02 seconds and the $R_1$ half 119, with the
     minors having 1,436,495 generators.
 Caveat
-  @TO computeFlip@ does not use this.  Once the projection is known to be small,
+  @TO computeRelativeCanonicalModel@ does not use this.  Once the projection is
+  known to be small,
   $R_1$ is automatic and normality reduces to @TO isS2Source@, which is the test
   actually run.
 SeeAlso
@@ -927,8 +941,9 @@ Headline
   follow the paper's Step 2 with a given section
 Description
   Text
-    Passing {\tt AntiCanonicalSection => s} makes @TO flipDivisorData@ and
-    @TO computeFlip@ form $E = \operatorname{div}(s) - K_X$, which is Step 3 of
+    Passing {\tt AntiCanonicalSection => s} makes @TO antiCanonicalDivisorData@
+    and @TO computeRelativeCanonicalModel@ form
+    $E = \operatorname{div}(s) - K_X$, which is Step 3 of
     the paper.  The default, {\tt null}, embeds $\omega_X$ into $R$ directly with
     @TO canonicalIdeal@ and is very much faster over a weighted grading.
 Caveat
@@ -961,7 +976,8 @@ Headline
   the largest multiplier m the search will try
 Description
   Text
-    @TO computeFlip@ tries $m = 1, 2, 3, \dots$ up to {\tt MaxMultiplier}, which
+    @TO computeRelativeCanonicalModel@ tries $m = 1, 2, 3, \dots$ up to
+    {\tt MaxMultiplier}, which
     is the order Algorithm 4 of the paper prescribes.  The default is 24.
 
     Consecutive $m$ is what finds the smallest working one, and that is what
@@ -986,10 +1002,11 @@ doc ///
 Key
   ReturnGraph
 Headline
-  return the flip as a graph morphism
+  return the relative canonical model as a graph morphism
 Description
   Text
-    With {\tt ReturnGraph => true}, @TO computeFlip@ passes its answer through
+    With {\tt ReturnGraph => true}, @TO computeRelativeCanonicalModel@ passes
+    its answer through
     @TO b2mToGraphMorphism@ and returns a @TO GraphMorphism@ instead of a
     @TO B2MProjection@.  This needs a projective base and fiber variables without
     weights.
@@ -1018,11 +1035,11 @@ SeeAlso
 
 doc ///
 Key
-  [computeFlip, AntiCanonicalSection]
+  [computeRelativeCanonicalModel, AntiCanonicalSection]
 Headline
   follow the paper's Step 2 with a given section
 Usage
-  computeFlip(R, AntiCanonicalSection => s)
+  computeRelativeCanonicalModel(R, AntiCanonicalSection => s)
 Description
   Text
     See @TO AntiCanonicalSection@.
@@ -1030,11 +1047,11 @@ Description
 
 doc ///
 Key
-  [computeFlip, Multipliers]
+  [computeRelativeCanonicalModel, Multipliers]
 Headline
   the multipliers m to try, in order
 Usage
-  computeFlip(R, Multipliers => ms)
+  computeRelativeCanonicalModel(R, Multipliers => ms)
 Description
   Text
     See @TO Multipliers@.
@@ -1042,11 +1059,11 @@ Description
 
 doc ///
 Key
-  [computeFlip, MaxMultiplier]
+  [computeRelativeCanonicalModel, MaxMultiplier]
 Headline
   the largest multiplier m the search will try
 Usage
-  computeFlip(R, MaxMultiplier => n)
+  computeRelativeCanonicalModel(R, MaxMultiplier => n)
 Description
   Text
     See @TO MaxMultiplier@.
@@ -1054,11 +1071,11 @@ Description
 
 doc ///
 Key
-  [computeFlip, ReturnGraph]
+  [computeRelativeCanonicalModel, ReturnGraph]
 Headline
-  return the flip as a graph morphism
+  return the relative canonical model as a graph morphism
 Usage
-  computeFlip(R, ReturnGraph => true)
+  computeRelativeCanonicalModel(R, ReturnGraph => true)
 Description
   Text
     See @TO ReturnGraph@.
@@ -1066,11 +1083,11 @@ Description
 
 doc ///
 Key
-  [computeFlip, BaseIsProjective]
+  [computeRelativeCanonicalModel, BaseIsProjective]
 Headline
   run the algorithm over an affine base
 Usage
-  computeFlip(R, BaseIsProjective => false)
+  computeRelativeCanonicalModel(R, BaseIsProjective => false)
 Description
   Text
     See @TO BaseIsProjective@.
@@ -1078,11 +1095,11 @@ Description
 
 doc ///
 Key
-  [computeFlip, Verbose]
+  [computeRelativeCanonicalModel, Verbose]
 Headline
   report each multiplier and each test as it is tried
 Usage
-  computeFlip(R, Verbose => false)
+  computeRelativeCanonicalModel(R, Verbose => false)
 Description
   Text
     On by default here, since a run can take a long time and the progress
@@ -1152,11 +1169,11 @@ Description
 
 doc ///
 Key
-  [flipDivisorData, AntiCanonicalSection]
+  [antiCanonicalDivisorData, AntiCanonicalSection]
 Headline
   follow the paper's Step 3 with a given section
 Usage
-  flipDivisorData(R, AntiCanonicalSection => s)
+  antiCanonicalDivisorData(R, AntiCanonicalSection => s)
 Description
   Text
     See @TO AntiCanonicalSection@.
@@ -1164,11 +1181,11 @@ Description
 
 doc ///
 Key
-  [flipDivisorData, BaseIsProjective]
+  [antiCanonicalDivisorData, BaseIsProjective]
 Headline
   compute E over an affine base
 Usage
-  flipDivisorData(R, BaseIsProjective => false)
+  antiCanonicalDivisorData(R, BaseIsProjective => false)
 Description
   Text
     See @TO BaseIsProjective@.
@@ -1183,7 +1200,8 @@ Usage
   isSmallProjection(P, Verbose => true)
 Description
   Text
-    Off by default.  @TO computeFlip@ turns it on when it is itself verbose.
+    Off by default.  @TO computeRelativeCanonicalModel@ turns it on when it is
+    itself verbose.
 ///
 
 doc ///

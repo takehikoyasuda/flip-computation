@@ -54,13 +54,13 @@ sl = ideal singularLocus R;
    << (radical sl == ideal take(gens S, #HB)) << endl;
 
 << endl << "-- the flip, over the projective base --" << endl;
-P = computeFlip R;
+P = computeRelativeCanonicalModel R;
 << endl << P << endl;
 << "I = " << P#blownUpIdeal << ",  uniform degree used = "
    << P#uniformDegreeUsed << endl;
 
 -- the affine computation of examples/toric-flip.m2
-Paff = computeFlip(Raff, BaseIsProjective => false, Verbose => false);
+Paff = computeRelativeCanonicalModel(Raff, BaseIsProjective => false, Verbose => false);
 << "affine I was " << Paff#blownUpIdeal << ", the same ideal" << endl;
 
 A = P#ambientRing;

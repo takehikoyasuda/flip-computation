@@ -7,7 +7,7 @@ newPackage(
         Name => "Takehiko Yasuda",
         Email => "yasuda.takehiko.sci@osaka-u.ac.jp"
         }},
-    Headline => "computing flips of threefolds",
+    Headline => "computing relative canonical models of threefolds",
     Keywords => {"Algebraic Geometry"},
     HomePage => "https://github.com/takehikoyasuda/flip-computation",
     PackageImports => {
@@ -44,7 +44,7 @@ export {
     "canonicalDivisorData",
     "antiCanonicalSection",
     "canonicalIdeal",
-    "flipDivisorData",
+    "antiCanonicalDivisorData",
     "divisorialIdeal",
     -- Section 6, Algorithm 4, Steps 4--5
     "singleDegreeIdeal",
@@ -54,7 +54,7 @@ export {
     "isSmallProjection",
     "isNormalSource",
     "isS2Source",
-    "computeFlip",
+    "computeRelativeCanonicalModel",
     -- options
     "AntiCanonicalSection",
     "Multipliers",
@@ -170,7 +170,7 @@ TEST ///
   S = QQ[y_1 .. y_(#HB), w, Degrees => degs | {1}];
   R = S/sub(I0, S);
 
-  (s, Ed) = flipDivisorData R;
+  (s, Ed) = antiCanonicalDivisorData R;
   J = divisorialIdeal(Ed, 1);
   assert(sort flatten degrees J == {2,3});          -- genuinely mixed
   assert(uniformDegree J == 3);
@@ -187,7 +187,7 @@ TEST ///
   -- and the right answer restricts to the affine one, which never needed any of
   -- this because the x variables carry no grading there
   Paff = bigradedReesProjection(divisorialIdeal(
-          last flipDivisorData(S0/I0, BaseIsProjective => false), 1),
+          last antiCanonicalDivisorData(S0/I0, BaseIsProjective => false), 1),
       BaseIsProjective => false);
   A = P#ambientRing;
   us = P#fiberVariables;
@@ -213,9 +213,11 @@ TEST ///
 -- whole default schedule on a real input is what the examples do.
 TEST ///
   R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
-  assert(try (computeFlip(R, BaseIsProjective => false, MaxMultiplier => 0,
+  assert(try (computeRelativeCanonicalModel(R,
+      BaseIsProjective => false, MaxMultiplier => 0,
       Verbose => false); false) else true);
-  assert(try (computeFlip(R, BaseIsProjective => false, MaxMultiplier => 3/2,
+  assert(try (computeRelativeCanonicalModel(R,
+      BaseIsProjective => false, MaxMultiplier => 3/2,
       Verbose => false); false) else true);
 ///
 
@@ -228,16 +230,16 @@ TEST ///
 TEST ///
   R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
   assert(canonicalIdeal R == ideal 1_R);
-  (s, Edata) = flipDivisorData R;
+  (s, Edata) = antiCanonicalDivisorData R;
   assert(#Edata == 0);
-  P = computeFlip(R, BaseIsProjective => false, Verbose => false);
+  P = computeRelativeCanonicalModel(R, BaseIsProjective => false, Verbose => false);
   assert(instance(P, B2MProjection));
   assert(#(P#fiberVariables) == 1);
   assert(geometricDimension P == dim R);
   assert(isSmallProjection(P, Verbose => false));
   assert(isS2Source P);
   -- and as a graph morphism over a projective base
-  G = computeFlip(R, ReturnGraph => true, Verbose => false);
+  G = computeRelativeCanonicalModel(R, ReturnGraph => true, Verbose => false);
   assert(instance(G, GraphMorphism));
 ///
 
@@ -288,7 +290,8 @@ TEST ///
   assert(K#0#0 != K#1#0);
 
   -- Algorithm 4 succeeds already for m = 1 and gives a threefold in P^1 x X.
-  P = computeFlip(R, BaseIsProjective => false, Multipliers => {1}, Verbose => false);
+  P = computeRelativeCanonicalModel(R,
+      BaseIsProjective => false, Multipliers => {1}, Verbose => false);
   assert(geometricDimension P == 3);
   assert(#(P#fiberVariables) == 2);
 
@@ -341,7 +344,7 @@ TEST ///
   assert(dim R - 1 == 3);
   assert(radical ideal singularLocus R == ideal take(gens S, #HB));
 
-  P = computeFlip(R, Multipliers => {1}, Verbose => false);
+  P = computeRelativeCanonicalModel(R, Multipliers => {1}, Verbose => false);
   assert(geometricDimension P == 3);
   assert(#(P#fiberVariables) == 2);
 
@@ -359,7 +362,8 @@ TEST ///
   assert(all(charts, c -> c#0 == 3 and c#1));
 
   -- and on D_+(w) it is exactly the affine flip
-  Paff = computeFlip(S0/I0, BaseIsProjective => false, Multipliers => {1},
+  Paff = computeRelativeCanonicalModel(S0/I0,
+      BaseIsProjective => false, Multipliers => {1},
       Verbose => false);
   phi = map(A, Paff#ambientRing, us | take(xs, #HB));
   assert(trim (P#definingIdeal + ideal(last xs - 1))
@@ -374,7 +378,8 @@ TEST ///
 --
 -- How badly Step 2 does here depends on the package version, so the test
 -- asserts the gap and not the particular degrees.  Under M2 1.24 with Divisor
--- it returned s = y_3^11 and an I^(1) in degree 30, and computeFlip did not
+-- it returned s = y_3^11 and an I^(1) in degree 30, and
+-- computeRelativeCanonicalModel did not
 -- finish in seventeen minutes; under 1.26 with WeilDivisors it returns s = 1
 -- and degree 8, which is survivable.  The direct embedding gives degree 2 in
 -- both, so the departure is worth making either way -- but the seventeen
@@ -397,16 +402,16 @@ TEST ///
   -- antiCanonicalSection, since it depends on the chosen representative of
   -- K_X, unlike the least-degree canonical embedding.
   assert(sort flatten degrees canonicalIdeal R == {2,2});
-  (sEmbed, EdEmbed) = flipDivisorData R;
+  (sEmbed, EdEmbed) = antiCanonicalDivisorData R;
   dEmbed = max flatten degrees divisorialIdeal(EdEmbed, 1);
   assert(dEmbed == 2);
   -- the paper's Step 2, which goes through a section
-  (sPaper, EdPaper) = flipDivisorData(R,
+  (sPaper, EdPaper) = antiCanonicalDivisorData(R,
       AntiCanonicalSection => antiCanonicalSection R);
   dPaper = max flatten degrees divisorialIdeal(EdPaper, 1);
   assert(dPaper > dEmbed);
 
-  P = computeFlip(R, Multipliers => {1}, Verbose => false);
+  P = computeRelativeCanonicalModel(R, Multipliers => {1}, Verbose => false);
   assert(geometricDimension P == 3);
   assert(#(P#fiberVariables) == 2);
 ///
@@ -427,13 +432,14 @@ TEST ///
   assert(dim R == 3);
 
   -- m = 1 is rejected: the exceptional locus contains a divisor.
-  (s, Edata) = flipDivisorData(R, BaseIsProjective => false);
+  (s, Edata) = antiCanonicalDivisorData(R, BaseIsProjective => false);
   P1 = bigradedReesProjection(divisorialIdeal(Edata, 1), BaseIsProjective => false);
   assert(#(P1#fiberVariables) == 3);
   assert(not isSmallProjection P1);
 
   -- m = 2 gives the flip.
-  P = computeFlip(R, BaseIsProjective => false, Multipliers => {1,2}, Verbose => false);
+  P = computeRelativeCanonicalModel(R,
+      BaseIsProjective => false, Multipliers => {1,2}, Verbose => false);
   assert(geometricDimension P == 3);
   assert(#(P#fiberVariables) == 2);
   assert(dim((P#ambientRing)/(P#definingIdeal + ideal P#baseVariables)) - 1 == 1);

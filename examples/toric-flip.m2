@@ -21,7 +21,7 @@
 --
 -- (the wall relation is the circuit relation, read with the two rays outside the
 -- wall on the positive side, and K = -sum D_i).  So Y --> X is the flipping
--- contraction and Z --> X is its flip, which is what computeFlip must return.
+-- contraction and Z --> X is its flip, which is what computeRelativeCanonicalModel must return.
 -- Note that both cones of Z have determinant +-1, so Z is smooth, whereas
 -- <v1,v2,v4> has determinant -2, so Y is singular.
 --
@@ -59,7 +59,7 @@ scan(#rayList, i -> << "  D_" << i+1 << " = " << Ds#i
        == divisor(R_0)) << endl;
 
 -- Steps 2--5.
-P = computeFlip(R, BaseIsProjective => false, Multipliers => {1,2});
+P = computeRelativeCanonicalModel(R, BaseIsProjective => false, Multipliers => {1,2});
 << endl << P << endl;
 << "blown up ideal I = O_X(-E): " << P#blownUpIdeal << endl;
 
