@@ -126,7 +126,7 @@ Description
     The affine toric threefold of {\tt examples/toric-flip.m2}, written out
     directly: the cone over the rays $(1,0,0)$, $(0,1,0)$, $(0,0,1)$,
     $(1,1,-2)$, whose coordinate ring is cut out by the $2\times 2$ minors
-    below.  It is not $\mathbf{Q}$-Gorenstein, so what comes back is a flip.
+    below.  It is not $\mathbb{Q}$-Gorenstein, so what comes back is a flip.
   Example
     R = QQ[u1,u2,u3,u4,u5]/minors(2, matrix{{u1,u2,u4},{u3,u4,u5}});
     Z = computeRelativeCanonicalModel(R, BaseIsProjective => false, Verbose => false)
@@ -213,7 +213,7 @@ Description
     @TO computeRelativeCanonicalModel@ or @TO bigradedReesProjection@ makes them
     work with
     $X = \operatorname{Spec} R$ for an arbitrary affine ring $R$.  The source $Z$
-    then still sits in $\mathbf{P}^{r-1} \times X$, cut out by an ideal
+    then still sits in $\mathbb{P}^{r-1} \times X$, cut out by an ideal
     homogeneous in the fiber variables alone, so only the cone over the base
     disappears: the irrelevant ideal becomes $\langle u_1,\dots,u_r\rangle$ and
     one cone direction fewer is subtracted from Krull dimensions.
@@ -484,7 +484,7 @@ Description
     Definition 2.8 of arXiv:2603.13703, where it is called a bi-to-mono
     projection; B2M is this package's own older name for it.  The source $Z$
     is a bigraded variety
-    sitting in $\mathbf{P}^{r-1} \times X$, the base $X$ is the monograded
+    sitting in $\mathbb{P}^{r-1} \times X$, the base $X$ is the monograded
     variety $\operatorname{Proj} R$, and the projection $\pi : Z \to X$ is the
     restriction of the second projection.  This is the form in which
     @TO computeRelativeCanonicalModel@ returns its relative canonical model.
@@ -840,7 +840,7 @@ Description
     R = QQ[x0,x1,x2,x3];
     canonicalDivisorData R
   Text
-    which reads $K_{\mathbf{P}^3} = -4H$.
+    which reads $K_{\mathbb{P}^3} = -4H$.
 Caveat
   Which representative of the canonical class comes back depends on the grading,
   and over a weighted grading it can be a bad one; that is the reason
@@ -1055,7 +1055,7 @@ Outputs
 Description
   Text
     Lemma 2.7 of arXiv:2603.13703.  The monoid is
-    $$A = \{(b,a) \in \mathbf{N}^{n+1}\times\mathbf{N}^{m+1} :
+    $$A = \{(b,a) \in \mathbb{N}^{n+1}\times\mathbb{N}^{m+1} :
       \textstyle\sum_j d_j b_j = \sum_i c_i a_i\},$$
     and its Hilbert basis gives the monomial generators of the Segre product
     $k[y] \# k[x]$.
@@ -1063,7 +1063,7 @@ Description
     #segreHilbertBasis({1,1},{1,1})
     #segreHilbertBasis({1,1},{1,2})
   Text
-    The first is the Segre product of two copies of $\mathbf{P}^1$, with the four
+    The first is the Segre product of two copies of $\mathbb{P}^1$, with the four
     generators one expects; the weighted case needs a fifth.
 SeeAlso
   segreProductRing
