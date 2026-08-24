@@ -13,12 +13,17 @@ DOCINDEX := $(DOCDIR)/share/doc/Macaulay2/FlipComputation/html/index.html
 # one part of the documentation that cannot be wrong quietly.
 M2DOC = M2 --no-readline --no-debug -q -e
 
+# Built up in pieces, and each recipe passes one unbroken line to the shell.
+# A backslash-newline inside the single-quoted M2 expression is not portable:
+# GNU make 3.81, as shipped on macOS, joins those lines before handing the
+# recipe to the shell, while make 4.x leaves the backslash in place, where
+# single quotes stop the shell from removing it and M2 stops with
+# "syntax error at '\'".
+INSTALL_ARGS = FileName => "FlipComputation.m2", InstallPrefix => "$(CURDIR)/$(DOCDIR)/", IgnoreExampleErrors => false, MakeInfo => false
+REMAKE_ARGS = RerunExamples => true, RemakeAllDocumentation => true
+
 docs:
-	$(M2DOC) 'installPackage("FlipComputation", \
-	    FileName => "FlipComputation.m2", \
-	    InstallPrefix => "$(CURDIR)/$(DOCDIR)/", \
-	    IgnoreExampleErrors => false, \
-	    MakeInfo => false); exit 0' < /dev/null
+	$(M2DOC) 'installPackage("FlipComputation", $(INSTALL_ARGS)); exit 0' < /dev/null
 	@echo
 	@echo "file://$(CURDIR)/$(DOCINDEX)"
 
@@ -26,12 +31,7 @@ docs:
 # after changing the code the examples call, or before a release.
 docs-all:
 	rm -rf $(DOCDIR)
-	$(M2DOC) 'installPackage("FlipComputation", \
-	    FileName => "FlipComputation.m2", \
-	    InstallPrefix => "$(CURDIR)/$(DOCDIR)/", \
-	    RerunExamples => true, RemakeAllDocumentation => true, \
-	    IgnoreExampleErrors => false, \
-	    MakeInfo => false); exit 0' < /dev/null
+	$(M2DOC) 'installPackage("FlipComputation", $(INSTALL_ARGS), $(REMAKE_ARGS)); exit 0' < /dev/null
 	@echo
 	@echo "file://$(CURDIR)/$(DOCINDEX)"
 
