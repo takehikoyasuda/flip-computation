@@ -10,7 +10,7 @@
 --
 -- and no m in M has m.v_i = 1 for all i (that would force m = (1,1,1), for which
 -- m.v4 = 0), so X = Spec k[sigma^v cap M] is a threefold that is *not*
--- Q-Gorenstein: K_X is not Q-Cartier.  This is the situation Algorithm 3 is
+-- Q-Gorenstein: K_X is not Q-Cartier.  This is the situation Algorithm 4 is
 -- meant for, and unlike the ordinary double point it is a flip rather than a
 -- flop.
 --

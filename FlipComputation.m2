@@ -18,11 +18,14 @@ newPackage(
     DebuggingMode => false
     )
 
--- This package implements Algorithm 3 (Computing a flip) of
+-- This package implements Algorithm 4 (Computing the relative canonical
+-- model) of
 --   T. Yasuda, An algorithm for the minimal model program in dimension three,
 --   arXiv:2603.13703,
--- together with the constructions of Sections 2.2--2.4 that the algorithm
--- needs in order to present its output as a graph morphism.
+-- together with the constructions of Sections 2.4--2.5 that the algorithm
+-- needs in order to present its output as a graph morphism.  Numbered results
+-- are cited by their v3 numbering; v2 places this material in Section 7 and
+-- numbers the algorithm 3.
 
 export {
     -- types
@@ -37,13 +40,13 @@ export {
     "geometricDimension",
     "isProjectiveBase",
     "restrictToBase",
-    -- Section 7, Steps 1--3
+    -- Section 6, Algorithm 4, Steps 1--3
     "canonicalDivisorData",
     "antiCanonicalSection",
     "canonicalIdeal",
     "flipDivisorData",
     "divisorialIdeal",
-    -- Section 7, Steps 4--5
+    -- Section 6, Algorithm 4, Steps 4--5
     "singleDegreeIdeal",
     "uniformDegree",
     "bigradedReesIdeal",
@@ -51,12 +54,11 @@ export {
     "isSmallProjection",
     "isNormalSource",
     "isS2Source",
-    "multiplierSchedule",
     "computeFlip",
     -- options
     "AntiCanonicalSection",
     "Multipliers",
-    "MaxSteps",
+    "MaxMultiplier",
     "ReturnGraph",
     "UniformDegree",
     "BaseIsProjective",
@@ -206,14 +208,15 @@ TEST ///
   assert(G#baseCoordinateRing === R);
 ///
 
--- The schedule of multipliers is every divisor of MaxSteps! in increasing
--- order, which still contains the factorials the paper prescribes.
+-- The default schedule is the paper's own: consecutive m from 1, capped by
+-- MaxMultiplier.  Exercised here through the option gate, since running the
+-- whole default schedule on a real input is what the examples do.
 TEST ///
-  assert(multiplierSchedule 3 == {1,2,3,6});
-  assert(multiplierSchedule 4 == {1,2,3,4,6,8,12,24});
-  assert(all({1,2,3,4,5}, n ->
-      isSubset(set apply(1..n, e -> e!), set multiplierSchedule n)));
-  assert(all({1,2,3,4,5}, n -> multiplierSchedule n == sort multiplierSchedule n));
+  R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+  assert(try (computeFlip(R, BaseIsProjective => false, MaxMultiplier => 0,
+      Verbose => false); false) else true);
+  assert(try (computeFlip(R, BaseIsProjective => false, MaxMultiplier => 3/2,
+      Verbose => false); false) else true);
 ///
 
 -- On a small projection R1 comes for free, so normality reduces to S2.  Check
@@ -262,7 +265,7 @@ TEST ///
   assert(all(K, pn -> pn#0 == Ds#0 or pn#0 == Ds#2));
   assert(K#0#0 != K#1#0);
 
-  -- Algorithm 3 succeeds already for m = 1 and gives a threefold in P^1 x X.
+  -- Algorithm 4 succeeds already for m = 1 and gives a threefold in P^1 x X.
   P = computeFlip(R, BaseIsProjective => false, Multipliers => {1}, Verbose => false);
   assert(geometricDimension P == 3);
   assert(#(P#fiberVariables) == 2);

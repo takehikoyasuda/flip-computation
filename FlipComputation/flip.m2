@@ -1,42 +1,31 @@
--- Algorithm 3: computing a flip.
+-- Algorithm 4: computing the relative canonical model.
 --
 -- Input: the homogeneous coordinate ring R of the target X of a flipping
 -- contraction f : Y --> X.
 -- Output: the flip g : Z --> X, as a B2M projection or as a graph morphism.
 --
 -- Steps 1-3 are carried out by flipDivisorData (see divisors.m2).  Steps 4-5
--- loop over m = 1!, 2!, 3!, ..., computing the Rees algebra R[I^(m)t] and testing
--- the two conditions of Lemma 7.2.
-
--- The schedule of multipliers for Step 4.
+-- loop over m = 1, 2, 3, ..., computing the Rees algebra R[I^(m)t] and testing
+-- the two conditions of Lemmas 6.6 and 6.7.
 --
--- The paper runs over m = 1!, 2!, 3!, ..., and one m that works is as good as
--- another, so what matters is finding a small one: the cost of an iteration
--- grows very steeply in m, because the number of generators of I^(m) -- and
--- with it the number of variables of the Rees algebra -- grows with m.  On the
--- threefold of examples/toric-flip.m2 one iteration costs 0.02 s at m = 1,
--- 0.9 s at m = 6, 7 s at m = 8, and more than ten minutes at m = 12.
+-- The multipliers are tried in the order the paper's Algorithm 4 states, m = 1,
+-- 2, 3, ..., up to MaxMultiplier.  Finding a small m is what matters, because
+-- the cost of an iteration grows very steeply in m: the number of generators of
+-- I^(m) -- and with it the number of variables of the Rees algebra -- grows with
+-- m, and on the threefold of examples/toric-flip.m2 one iteration costs 0.02 s
+-- at m = 1, 0.9 s at m = 6, 7 s at m = 8, and more than ten minutes at m = 12.
+-- Consecutive m is exactly the order that finds the smallest working one.
 --
--- So we try every divisor of MaxSteps! in increasing order.  That still contains
--- 1!, 2!, ..., MaxSteps!, so the termination guarantee is unchanged, and filling
--- in the gaps is nearly free because the largest m tried dominates the total:
--- running all of 1, 2, 3, 4, 6, 8 above costs 8.5 seconds against more than 600
--- for m = 12 alone.
-multiplierSchedule = method()
-multiplierSchedule ZZ := n -> (
-    if n < 1 then error "multiplierSchedule: expected a positive integer";
-    ds := {1};
-    scan(toList factor (n!), pe -> (
-        p := pe#0;
-        ds = flatten apply(ds, d -> apply(pe#1 + 1, i -> d * p^i));
-        ));
-    sort ds
-    )
-
+-- Earlier releases instead tried every divisor of MaxSteps!, because v2 of the
+-- paper guaranteed termination only along m = 1!, 2!, 3!, ... and the divisors
+-- of n! are the small values that keep those factorials in the list.  Lemma 6.6
+-- carries no divisibility condition on m, so that detour is no longer needed --
+-- and it was skipping values (5, 7, 9, ...) at which a cheap answer could have
+-- been found, only to pay for a much larger m afterwards.
 computeFlip = method(Options => {
         AntiCanonicalSection => null,
         Multipliers => null,
-        MaxSteps => 4,
+        MaxMultiplier => 24,
         ReturnGraph => false,
         BaseIsProjective => true,
         Verbose => true
@@ -52,8 +41,12 @@ computeFlip Ring := o -> R -> (
         << "-- E has " << #Edata << " component(s) with multiplicities "
            << toString apply(Edata, pe -> pe#1) << endl;
         );
-    ms := if o.Multipliers === null then multiplierSchedule o.MaxSteps
-        else toList o.Multipliers;
+    ms := if o.Multipliers =!= null then toList o.Multipliers
+        else (
+            if not instance(o.MaxMultiplier,ZZ) or o.MaxMultiplier < 1 then
+                error "computeFlip: MaxMultiplier must be a positive integer";
+            toList (1..o.MaxMultiplier)
+            );
     for m in ms do (
         if o.Verbose then << "-- m = " << m << ":" << endl;
         Im := divisorialIdeal(Edata, m);
@@ -76,5 +69,6 @@ computeFlip Ring := o -> R -> (
         return if o.ReturnGraph then b2mToGraphMorphism(P, Verbose => o.Verbose) else P;
         );
     error("computeFlip: none of the multipliers " | toString ms
-        | " produced the flip; increase MaxSteps or supply Multipliers")
+        | " produced the relative canonical model; increase MaxMultiplier or "
+        | "supply Multipliers")
     )

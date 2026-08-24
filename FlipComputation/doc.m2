@@ -5,13 +5,13 @@ Headline
   computing flips of threefolds
 Description
   Text
-    This package implements Algorithm 3 (Computing a flip) of
+    This package implements Algorithm 4 (Computing the relative canonical model) of
 
     T. Yasuda, {\em An algorithm for the minimal model program in dimension
     three}, arXiv:2603.13703,
 
-    together with the auxiliary constructions of Sections 2.2--2.4 of that paper
-    (Segre products, B2M projections and graph morphisms).
+    together with the auxiliary constructions of Sections 2.4--2.5 of that paper
+    (the $w$-diagonal, bi-to-mono projections and graph morphisms).
 
     A variety $X$ is represented by its homogeneous coordinate ring
     $R = k[x_0,\dots,x_m]/\langle f_1,\dots,f_l\rangle$, where the polynomial
@@ -43,12 +43,12 @@ Outputs
     {\tt ReturnGraph => true}
 Description
   Text
-    This is Algorithm 3 of arXiv:2603.13703.  A canonical divisor
+    This is Algorithm 4 of arXiv:2603.13703.  A canonical divisor
     $K_X = \sum n_i D_i$ is computed, a homogeneous element $s$ with
     $-K_X + \operatorname{div}(s)$ effective is chosen, and the Rees algebras
     $R[I^{(m)}t]$ of the symbolic powers of $I = \mathcal{O}_X(K_X-\operatorname{div}(s))$
-    are computed for $m = 1!, 2!, 3!, \dots$ until the two conditions of Lemma
-    7.2 hold: $Z^m$ is normal and the exceptional locus of $Z^m \to X$ has
+    are computed for increasing $m$ until the two conditions of Lemmas 6.6 and
+    6.7 hold: $Z^m$ is normal and the exceptional locus of $Z^m \to X$ has
     codimension at least two.
 
     With {\tt BaseIsProjective => false} the same algorithm is run over
@@ -159,39 +159,6 @@ Caveat
 
 doc ///
 Key
-  multiplierSchedule
-  (multiplierSchedule, ZZ)
-Headline
-  the multipliers m tried by computeFlip
-Usage
-  ms = multiplierSchedule n
-Inputs
-  n:ZZ
-Outputs
-  ms:List
-    every divisor of $n!$, in increasing order
-Description
-  Text
-    The paper runs Step 4 over $m = 1!, 2!, 3!, \dots$. One $m$ that works is as
-    good as another, so what matters is finding a small one: the cost of an
-    iteration grows very steeply in $m$, because the number of generators of
-    $I^{(m)}$ -- and with it the number of variables of the Rees algebra -- grows
-    with $m$. On the threefold of {\tt examples/toric-flip.m2} one iteration
-    costs 0.02 s at $m=1$, 0.9 s at $m=6$, 7 s at $m=8$, and more than ten
-    minutes at $m=12$.
-
-    Taking every divisor of $n!$ still contains $1!, \dots, n!$, so the
-    termination guarantee is unchanged, and filling in the gaps is nearly free
-    because the largest $m$ tried dominates the total: running all of
-    $1,2,3,4,6,8$ costs 8.5 seconds against more than 600 for $m=12$ alone.
-  Example
-    multiplierSchedule 4
-SeeAlso
-  computeFlip
-///
-
-doc ///
-Key
   canonicalIdeal
   (canonicalIdeal, Ring)
 Headline
@@ -205,7 +172,7 @@ Outputs
     an ideal of $R$ isomorphic to $\omega_R$
 Description
   Text
-    Steps 2 and 3 of Algorithm 3 together amount to embedding $\omega_X$ into
+    Steps 2 and 3 of Algorithm 4 together amount to embedding $\omega_X$ into
     $R$ as an ideal: the ideal $I = \mathcal{O}_X(K_X - \operatorname{div}(s))$
     of Step 3 is isomorphic to $\omega_X$, and every ideal isomorphic to
     $\omega_X$ arises this way. Rather than choosing $s$ and then forming the
@@ -291,7 +258,7 @@ Description
     computation.
 
     Applying the criterion to the whole of $\operatorname{Spec} A$ instead --
-    that is, asking the cone to be $S_2$ -- is strictly more than Lemma 7.2 asks
+    that is, asking the cone to be $S_2$ -- is strictly more than Lemma 6.6 asks
     for, because the vertex locus
     $V(A_+) \cong \operatorname{Spec} R$ has codimension one in
     $\operatorname{Spec} A$.
@@ -299,7 +266,7 @@ Description
     relevant homogeneous $f$, $B$ is finite over $B' = B_0[f,f^{-1}]$ and $B'$
     is a direct summand of $B$ as a $B'$-module, so $B$ being $S_2$ forces
     $B_0 = A_{(f)}$ to be $S_2$. It is moreover {\em necessary}, hence exactly
-    the condition of Lemma 7.2, when every relevant variable has weight one: the
+    the condition of Lemma 6.6, when every relevant variable has weight one: the
     torus then acts freely on $\operatorname{Spec} A \setminus V(\mathrm{irr})$,
     which becomes a torsor over $Z$ and lets $S_2$ travel in both directions.
     That covers an affine base and a projective base with the standard grading.
@@ -354,9 +321,9 @@ Outputs
   G:GraphMorphism
 Description
   Text
-    This is Lemma 2.6 of arXiv:2603.13703.  The source of the projection is
+    This is Lemma 2.10 of arXiv:2603.13703.  The source of the projection is
     turned into a monograded variety by means of the Segre isomorphism of
-    Section 2.2, and the graph of the resulting morphism is computed as a
+    Section 2.4, and the graph of the resulting morphism is computed as a
     bigraded variety.  For a skew fibre block with degrees $(p_j,e_j)$, the
     implementation chooses an integral slope $D>e_j/p_j$ and applies the same
     affine-semigroup construction to the positive weights $Dp_j-e_j$.
@@ -371,11 +338,13 @@ Headline
   a bigraded variety together with its projection to a monograded variety
 Description
   Text
-    Definition 2.4 of arXiv:2603.13703.  The source $Z$ is a bigraded variety
+    Definition 2.8 of arXiv:2603.13703, where it is called a bi-to-mono
+    projection; B2M is this package's own older name for it.  The source $Z$
+    is a bigraded variety
     sitting in $\mathbf{P}^{r-1} \times X$, the base $X$ is the monograded
     variety $\operatorname{Proj} R$, and the projection $\pi : Z \to X$ is the
     restriction of the second projection.  This is the form in which
-    @TO computeFlip@ returns a flip.
+    @TO computeFlip@ returns its relative canonical model.
 
     As an extension beyond the scope of the paper the base may instead be
     $\operatorname{Spec} R$; see @TO BaseIsProjective@ and @TO isProjectiveBase@.
@@ -414,7 +383,7 @@ Headline
   a morphism of monograded varieties, presented by its graph
 Description
   Text
-    Section 2.4 of arXiv:2603.13703.  A morphism $W \to X$ of monograded
+    Section 2.5 of arXiv:2603.13703.  A morphism $W \to X$ of monograded
     varieties is recorded as its graph inside $W \times X$, which is a bigraded
     variety.  @TO b2mToGraphMorphism@ produces one from a @TO B2MProjection@,
     and @TO computeFlip@ returns one when {\tt ReturnGraph => true}.
@@ -478,7 +447,7 @@ Headline
 Description
   Text
     The ring $W$ obtained from the source of a @TO B2MProjection@ by the Segre
-    isomorphism of Lemma 2.3.  Present only on a @TO GraphMorphism@.
+    isomorphism of Proposition 2.6.  Present only on a @TO GraphMorphism@.
 SeeAlso
   GraphMorphism
   b2mToGraphMorphism
@@ -662,7 +631,7 @@ Outputs
     $K_X = \sum n_i D_i$ with $D_i = V(p_i)$
 Description
   Text
-    Step 1 of Algorithm 3.  The canonical module is computed by the {\tt WeilDivisors}
+    Step 1 of Algorithm 4.  The canonical module is computed by the {\tt WeilDivisors}
     package as $\operatorname{Ext}^t(R,\omega)$.
   Example
     R = QQ[x0,x1,x2,x3];
@@ -697,7 +666,7 @@ Outputs
   s:RingElement
 Description
   Text
-    Step 2 of Algorithm 3: an element of $\prod_i p_i^{\max(0,n_i)}$, taken of
+    Step 2 of Algorithm 4: an element of $\prod_i p_i^{\max(0,n_i)}$, taken of
     least degree among the generators of that product.  When every $n_i$ is
     negative -- which happens routinely in the toric examples -- the product is
     the unit ideal and $s = 1$.
@@ -728,7 +697,7 @@ Outputs
     by pairs $\{p_i, e_i\}$ describing $E$
 Description
   Text
-    Step 3 of Algorithm 3.  By default $I$ is @TO canonicalIdeal@, an embedding
+    Step 3 of Algorithm 4.  By default $I$ is @TO canonicalIdeal@, an embedding
     $\omega_X \hookrightarrow R$ of least degree, and $E$ is the divisor of that
     ideal; passing {\tt AntiCanonicalSection => s} follows the paper instead and
     forms $\operatorname{div}(s) - K_X$.
@@ -842,7 +811,7 @@ Outputs
     the Hilbert basis, as exponent vectors
 Description
   Text
-    Lemma 2.3 of arXiv:2603.13703.  The monoid is
+    Lemma 2.7 of arXiv:2603.13703.  The monoid is
     $$A = \{(b,a) \in \mathbf{N}^{n+1}\times\mathbf{N}^{m+1} :
       \textstyle\sum_j d_j b_j = \sum_i c_i a_i\},$$
     and its Hilbert basis gives the monomial generators of the Segre product
@@ -957,28 +926,40 @@ Headline
   the multipliers m to try, in order
 Description
   Text
-    A list, overriding the schedule @TO multiplierSchedule@ would produce.  Since
+    A list, replacing the default $1, 2, 3, \dots$ of @TO MaxMultiplier@.  Since
     any $m$ that works gives the same answer, this is chiefly a way to pin an
     example to the $m$ known to settle it, or to check that a smaller $m$ really
     is rejected.
 SeeAlso
-  MaxSteps
-  multiplierSchedule
+  MaxMultiplier
 ///
 
 doc ///
 Key
-  MaxSteps
+  MaxMultiplier
 Headline
-  how far the schedule of multipliers runs
+  the largest multiplier m the search will try
 Description
   Text
-    @TO computeFlip@ tries every divisor of {\tt MaxSteps}$!$ in increasing
-    order, which contains the $1!, 2!, \dots$ of the paper.  The default is 4,
-    giving $1,2,3,4,6,8,12,24$.
+    @TO computeFlip@ tries $m = 1, 2, 3, \dots$ up to {\tt MaxMultiplier}, which
+    is the order Algorithm 4 of the paper prescribes.  The default is 24.
+
+    Consecutive $m$ is what finds the smallest working one, and that is what
+    matters: the cost of an iteration grows very steeply in $m$, because the
+    number of generators of $I^{(m)}$ -- and with it the number of variables of
+    the Rees algebra -- grows with $m$.  On the threefold of
+    {\tt examples/toric-flip.m2} one iteration costs 0.02 s at $m=1$, 0.9 s at
+    $m=6$, 7 s at $m=8$, and more than ten minutes at $m=12$.
+
+    Earlier releases instead tried every divisor of {\tt MaxSteps}$!$, because
+    v2 of the paper guaranteed termination only along $m = 1!, 2!, 3!, \dots$
+    and the divisors of $n!$ are the small values that keep those factorials in
+    the list.  Lemma 6.6 carries no divisibility condition on $m$, so that
+    detour is gone; it had been skipping values ($5, 7, 9, \dots$) at which a
+    cheap answer could have been found, only to pay for a much larger $m$
+    afterwards.
 SeeAlso
   Multipliers
-  multiplierSchedule
 ///
 
 doc ///
@@ -1041,14 +1022,14 @@ Description
 
 doc ///
 Key
-  [computeFlip, MaxSteps]
+  [computeFlip, MaxMultiplier]
 Headline
-  how far the schedule of multipliers runs
+  the largest multiplier m the search will try
 Usage
-  computeFlip(R, MaxSteps => n)
+  computeFlip(R, MaxMultiplier => n)
 Description
   Text
-    See @TO MaxSteps@.
+    See @TO MaxMultiplier@.
 ///
 
 doc ///

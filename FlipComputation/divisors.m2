@@ -1,4 +1,4 @@
--- Steps 1--3 of Algorithm 3: the canonical divisor of X, a homogeneous element s
+-- Steps 1--3 of Algorithm 4: the canonical divisor of X, a homogeneous element s
 -- with -K_X + div(s) effective, and the ideal sheaf O_X(K_X - div(s)) together
 -- with its symbolic powers.
 --

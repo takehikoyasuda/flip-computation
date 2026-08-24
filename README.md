@@ -1,15 +1,21 @@
 # FlipComputation
 
-A Macaulay2 implementation of the algorithm for computing flips described in
-Section 7 of
+A Macaulay2 implementation of the algorithm for computing relative canonical
+models described in Section 6 of
 
 > T. Yasuda, *An algorithm for the minimal model program in dimension three*,
 > [arXiv:2603.13703](https://arxiv.org/abs/2603.13703).
 
-The package implements Algorithm 3 (Computing a flip) of that paper, together
-with the auxiliary constructions from Sections 2.2--2.4 (Segre products, B2M
-projections and graph morphisms) that the algorithm needs in order to return
-its output as a graph morphism of monograded varieties.
+The package implements Algorithm 4 (Computing the relative canonical model) of
+that paper, together with the auxiliary constructions from Sections 2.4--2.5
+(the `w`-diagonal, bi-to-mono projections and graph morphisms) that the
+algorithm needs in order to return its output as a graph morphism of
+monograded varieties.  When the contraction it is applied to is small, the
+relative canonical model is the flip of that contraction, which is the case
+the worked examples below exhibit.
+
+Numbered results are cited by their v3 numbering throughout; earlier versions
+number some of them differently, and v2 places this material in Section 7.
 
 ## Status
 

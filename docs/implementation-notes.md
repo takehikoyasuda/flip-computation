@@ -1,24 +1,27 @@
 # Implementation notes
 
-How the code relates to arXiv:2603.13703, and where it deviates.
+How the code relates to arXiv:2603.13703, and where it deviates.  Numbered
+results are cited by their v3 numbering; v2 places the relative-canonical-model
+material in Section 7, numbers that algorithm 3, and numbers several of the
+Section 2 results differently.
 
 ## Correspondence
 
 | Paper | Code |
 | --- | --- |
 | Def. 2.1, monograded variety | a graded quotient ring `R = k[x]/I`, arbitrary positive weights |
-| Def. 2.2, bigraded variety | a bigraded quotient of `k[u,x]`, `deg u_i = (1,0)`, `deg x_j = (0,c_j)` |
-| Def. 2.4, B2M projection | `B2MProjection` (`FlipComputation/basics.m2`) |
-| Def. 2.5, graph morphism | `GraphMorphism` |
-| Lemma 2.3, Segre product | `segreHilbertBasis`, `segreProductRing` (`segre.m2`) |
-| Lemma 2.6, B2M → graph | `b2mToGraphMorphism` (`segre.m2`) |
+| Def. 2.5, bigraded variety | a bigraded quotient of `k[u,x]`, `deg u_i = (1,0)`, `deg x_j = (a_j,c_j)` |
+| Def. 2.8, bi-to-mono projection | `B2MProjection` (`FlipComputation/basics.m2`) |
+| Def. 2.9, graph morphism | `GraphMorphism` |
+| Prop. 2.6 and Lemma 2.7, the `w`-diagonal | `segreHilbertBasis`, `segreProductRing` (`segre.m2`), which implement the Segre-product case `w = (1,1)` |
+| Lemma 2.10, bi-to-mono → graph | `b2mToGraphMorphism` (`segre.m2`) |
 | Section 3, canonical divisor | `canonicalDivisorData` (`divisors.m2`), via `WeilDivisors::canonicalDivisor` |
-| Alg. 3, Step 1 | `canonicalDivisorData` |
-| Alg. 3, Step 2 | `antiCanonicalSection`, but see "Choice of s" below |
-| Alg. 3, Step 3 | `flipDivisorData`, `divisorialIdeal` |
-| Alg. 3, Steps 4–5 | `computeFlip` (`flip.m2`), `bigradedReesProjection` (`rees.m2`) |
-| Lemma 7.2, normality | `isNormalSource` |
-| Lemma 7.2, exceptional locus | `isSmallProjection` |
+| Alg. 4, Step 1 | `canonicalDivisorData` |
+| Alg. 4, Step 2 | `antiCanonicalSection`, but see "Choice of s" below |
+| Alg. 4, Step 3 | `flipDivisorData`, `divisorialIdeal` |
+| Alg. 4, Steps 4–5 | `computeFlip` (`flip.m2`), `bigradedReesProjection` (`rees.m2`) |
+| Lemma 6.6, the `S_2` hypothesis | `isNormalSource` |
+| Lemma 6.7, exceptional locus | `isSmallProjection` |
 | — (outside the paper) | affine base, `BaseIsProjective => false` |
 
 ## Deviations and choices
@@ -67,12 +70,12 @@ For general fibre degrees `(p_j,e_j)`, choose an integer
     n = sum_j p_j b_j.
 
 The transformed fibre weights `D p_j-e_j` are positive, so the same Hilbert
-basis construction as Lemma 2.3 produces a monograded model. This is
+basis construction as Lemma 2.7 produces a monograded model. This is
 implemented by `b2mDiagonalData` and restores `b2mToGraphMorphism` for skew
 projective fibre blocks. In the weighted toric regression the degrees
 `(1,0),(1,1)` give `D=2` and transformed weights `2,1`.
 
-**Normality test.** `computeFlip` tests the two conditions of Lemma 7.2 in the
+**Normality test.** `computeFlip` tests the two conditions of Lemmas 6.6 and 6.7 in the
 order "exceptional locus, then normality", and tests normality as `S2` alone
 (`isS2Source`). See "Normality is only S2" below. `isNormalSource`, the full
 test on the affine cone over `Z^m`, is still exported but no longer used by the
@@ -154,7 +157,9 @@ The two agree; `SymbolicPowers` grows steeply while the other is flat in `m`.
 `divisorialIdeal` uses the latter. (`UseMinimalPrimes => true` makes
 `SymbolicPowers` slower still: 5.2 s at `m = 8`.)
 
-**Schedule of m.** The paper runs over `m = 1!, 2!, 3!, ...`. One `m` that works
+**Schedule of m.** Algorithm 4 runs over `m = 1, 2, 3, ...`, and that is what
+`computeFlip` does, up to `MaxMultiplier` (default 24).
+One `m` that works
 is as good as another, so what matters is finding a *small* one: the cost of an
 iteration grows very steeply in `m`, because the number of generators of `I^(m)`
 — and with it the number of variables of the Rees algebra — grows with `m`. On
@@ -164,13 +169,20 @@ the same threefold, one iteration costs
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | cost | 0.02 s | 0.15 s | 0.17 s | 0.29 s | 0.87 s | 7.0 s | > 600 s |
 
-so `multiplierSchedule` takes every divisor of `MaxSteps!` in increasing order
-(`1,2,3,4,6,8,12,24` by default) rather than the factorials alone. That still
-contains `1!, ..., MaxSteps!`, so the termination guarantee is unchanged, and
-filling in the gaps is nearly free because the largest `m` tried dominates the
-total: all of `1,2,3,4,6,8` together cost 8.5 seconds against more than 600 for
-`m = 12` alone. With the factorials alone, a threefold whose answer is `m = 3`,
-`4` or `8` would jump straight to `m = 24`.
+Consecutive `m` is exactly the order that finds the smallest working one, and
+the largest `m` reached dominates the total, so the small iterations are nearly
+free.
+
+This used to be `multiplierSchedule`, every divisor of `MaxSteps!` in increasing
+order (`1,2,3,4,6,8,12,24` by default). That detour existed because v2 of the
+paper guaranteed termination only along `m = 1!, 2!, 3!, ...`, and the divisors
+of `n!` are the small values that keep those factorials in the list. Lemma 6.6
+carries no divisibility condition on `m`, so the guarantee no longer needs
+propping up — and the divisor schedule had a cost of its own: it skips `5`, `7`,
+`9`, `10`, `11`, so a threefold settled by `m = 5` would be pushed to `6`, then
+`8`, then `12` at more than 600 s. `multiplierSchedule` is gone, and `MaxSteps`
+is now `MaxMultiplier`, a direct bound on `m` rather than an `n` in `n!`; its
+default of 24 keeps the reach the old default had.
 
 `Multipliers` still allows an explicit list instead.
 
@@ -195,7 +207,7 @@ symbolic power computations much heavier.
   (`geometricDimension`, `bigradedDim`, `imageDimension`).
 
 `isSmallProjection` and `isNormalSource` are unchanged. `b2mToGraphMorphism` has
-no affine analogue — the Segre construction of Lemma 2.3 needs both gradings —
+no affine analogue — the Segre construction of Lemma 2.7 needs both gradings —
 and raises an error.
 
 ## The toric test case
@@ -289,7 +301,7 @@ iterates. The index of `K_Z` being 2 is the obvious explanation for why an even
 
 ## Normality is only S2
 
-Both conditions of Lemma 7.2 are required, so testing them in either order gives
+Both conditions of Lemmas 6.6 and 6.7 are required, so testing them in either order gives
 the same answer. But the order matters for more than speed.
 
 **A small projection is R1 for free.** Let `z` be a point of `Z` of codimension
@@ -309,14 +321,14 @@ most `j+1`. `Z` is covered by the primes of `A` that do not contain the
 irrelevant ideal, so `Z` is `S2` exactly when every such bad component lies in
 the irrelevant locus — the same step `isSmallProjection` already performs.
 
-Asking the whole cone to be `S2` would be strictly more than Lemma 7.2 needs,
+Asking the whole cone to be `S2` would be strictly more than Lemma 6.6 needs,
 because the vertex locus `V(A_+) = Spec R` has codimension one in `Spec A`, and
 requiring `S2` there can reject an `m` that in fact works. Testing on `Z`
 removes that gap, and needs neither an affine cover nor a Veronese computation.
 
 **Weights.** The weights in question are the `c_j` of `deg x_j = (0,c_j)`, that
 is, those of the weighted projective space the base `X = Proj R` sits in; the
-paper's Definition 2.2 allows weights `d_j` on the fiber variables too, though
+paper's Definition 2.5 allows weights `d_j` on the fiber variables too, though
 the Rees construction always produces `d_j = 1`. Passing to a Veronese would
 make any monograded variety standard-graded, but at a ruinous cost in the number
 of variables, which is presumably why the paper allows arbitrary weights in the
@@ -327,7 +339,7 @@ homogeneous `f`, `B` is finite over `B' = B_0[f,f^{-1}]` and `B'` is a direct
 summand of `B` as a `B'`-module, so `depth B' >= depth B` while the dimensions
 agree, and `B` being `S2` forces `B_0 = A_(f)` to be `S2`.
 
-It is *necessary* as well, hence exactly Lemma 7.2's condition, when every
+It is *necessary* as well, hence exactly Lemma 6.7's condition, when every
 relevant variable has weight one: the torus then acts freely on
 `Spec A - V(irr)`, which becomes a torsor over `Z`, and `S2` travels both ways.
 That covers an affine base and a projective base with the standard grading.
@@ -389,7 +401,7 @@ strictly stronger in practice.
 
 * Over a weighted grading the `S2` test is sufficient but not known to be
   necessary, see above; over an affine base and over a standard-graded projective
-  base it is exactly Lemma 7.2's condition.
+  base it is exactly Lemma 6.7's condition.
 * The base field is `QQ` in the examples; the paper works over `Qbar`. Nothing in
   the code assumes `QQ`, but arithmetic over number fields has not been tested.
 * No check is made that the input really is the target of a flipping contraction;

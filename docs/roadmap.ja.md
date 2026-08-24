@@ -4,6 +4,21 @@
 対象論文: T. Yasuda, *An algorithm for the minimal model program in dimension three*,
 [arXiv:2603.13703](https://arxiv.org/abs/2603.13703)、第7章 Algorithm 3。
 
+> **番号について（後注）** この覚書の定理・アルゴリズム番号は執筆当時の版（v2）の
+> ものである。v3 では該当箇所が第6章に移り、Algorithm 3 は Algorithm 4（Computing
+> the relative canonical model）になった。ほかに Lemma 2.3 → Prop. 2.6 / Lemma 2.7、
+> Lemma 2.6 → Lemma 2.10、Lemma 7.2 → Lemma 6.6・6.7、Definition 2.2 → 2.5、
+> Definition 2.4 → 2.8（bi-to-mono projection）、Algorithm 1（Stein 分解）→
+> Algorithm 2、Algorithm 2（contraction）→ Algorithm 3、Algorithm 4（MMP 全体）→
+> Algorithm 5 と動いている。記録としての正確さのため本文は当時のまま残す。
+> 現行の対応は [`implementation-notes.md`](implementation-notes.md) を参照。
+>
+> また、本文が「完了」としている `multiplierSchedule`（`MaxSteps!` の約数を昇順に
+> 試す）はその後撤去した。v3 の Lemma 6.6 に $m$ の可除性条件が無くなり、
+> Algorithm 4 自身が $m=1,2,3,\dots$ を列挙するため、約数列を経由する理由が
+> 消えたからである（約数列は 5,7,9,… を飛ばすため不利でもあった）。現在は
+> `MaxMultiplier`（既定 24）までの連番を試す。
+
 ## 1. 現状
 
 以下が動いている（テスト13件、`M2 --script tests/run-tests.m2` が約5秒で通過）。
