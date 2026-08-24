@@ -24,6 +24,54 @@ Description
     P = bigradedReesProjection ideal(x0,x2)
     isNormalSource P
     isSmallProjection P
+Subnodes
+  :Start here: compute a relative canonical model
+  computeRelativeCanonicalModel
+  :Testing a candidate (Lemmas 6.6 and 6.7)
+  isSmallProjection
+  isNormalSource
+  isS2Source
+  :Algorithm 4, Steps 1--3: the canonical divisor and its ideal
+  canonicalDivisorData
+  antiCanonicalSection
+  antiCanonicalDivisorData
+  canonicalIdeal
+  divisorialIdeal
+  :Algorithm 4, Steps 4--5: the Rees algebra and its projection
+  uniformDegree
+  singleDegreeIdeal
+  bigradedReesIdeal
+  bigradedReesProjection
+  :Bigraded varieties and graph morphisms (Sections 2.4--2.5)
+  segreHilbertBasis
+  segreProductRing
+  b2mDiagonalData
+  b2mToGraphMorphism
+  graphMorphismIdeal
+  geometricDimension
+  isProjectiveBase
+  restrictToBase
+  :The two types a computation returns
+  B2MProjection
+  GraphMorphism
+  :Their fields
+  ambientRing
+  definingIdeal
+  totalRing
+  sourceRing
+  baseCoordinateRing
+  fiberVariables
+  baseVariables
+  irrelevantIdeal
+  blownUpIdeal
+  uniformDegreeUsed
+  :Options
+  AntiCanonicalSection
+  Multipliers
+  MaxMultiplier
+  ReturnGraph
+  UniformDegree
+  BaseIsProjective
 ///
 
 doc ///
@@ -74,6 +122,20 @@ Description
     The two conditions are tested in the order "exceptional locus, then
     normality", and normality is tested as $S_2$ alone: a small projection
     satisfies $R_1$ automatically, see @TO isS2Source@.
+  Text
+    The affine toric threefold of {\tt examples/toric-flip.m2}, written out
+    directly: the cone over the rays $(1,0,0)$, $(0,1,0)$, $(0,0,1)$,
+    $(1,1,-2)$, whose coordinate ring is cut out by the $2\times 2$ minors
+    below.  It is not $\mathbf{Q}$-Gorenstein, so what comes back is a flip.
+  Example
+    R = QQ[u1,u2,u3,u4,u5]/minors(2, matrix{{u1,u2,u4},{u3,u4,u5}});
+    Z = computeRelativeCanonicalModel(R, BaseIsProjective => false, Verbose => false)
+    Z#fiberVariables
+    isSmallProjection Z
+  Text
+    Two fibre variables, so the projection is not the identity, and it is
+    small.  On the ordinary double point, where $K_X$ is linearly trivial, the
+    same call returns the identity of $X$ instead: that contraction is a flop.
 Caveat
   The $S_2$ test is exact over an affine base and over a projective base with
   the standard grading; over a weighted grading it is sufficient but not
@@ -127,6 +189,14 @@ Description
     $\operatorname{Spec} R$ instead.  The $x$ variables then carry no grading, the
     relations $u_i - f_i t$ are homogeneous in $u$ whatever the degrees of the
     $f_i$, and no replacement of $J$ is needed.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2)
+    P#fiberVariables
+    isSmallProjection P
+  Text
+    The small resolution of the three-dimensional ordinary double point,
+    obtained by blowing up one of the two planes through its vertex.
 SeeAlso
   BaseIsProjective
 ///
@@ -168,6 +238,17 @@ Inputs
   D:ZZ
 Outputs
   J':Ideal
+Description
+  Text
+    On the standard grading this levels the generators without changing the
+    ideal sheaf.  Under a weighted grading it can lose a generator outright,
+    which is what the caveat below is about: here $R_1 = 0$, so the degree-2
+    generator $y$ has nothing to multiply into degree 3 and disappears.
+  Example
+    R = QQ[y,z, Degrees => {2,3}];
+    J = ideal(y,z)
+    uniformDegree J
+    singleDegreeIdeal(J,3)
 Caveat
   This used to be how @TO bigradedReesProjection@ forced the generators of
   $I^{(m)}$ into a single degree, on the grounds that the result defines the
@@ -212,6 +293,15 @@ Description
     $(2,2,1)$, that route gives $s = y_3^{11}$ and an $I^{(1)}$ in degree 30,
     which does not finish; the least-degree embedding gives generators of degree
     2 and takes a twentieth of a second.
+  Example
+    R = QQ[u1,u2,u3,u4,u5]/minors(2, matrix{{u1,u2,u4},{u3,u4,u5}});
+    canonicalIdeal R
+  Text
+    On the ordinary double point the answer is the unit ideal instead, since
+    $K_X$ is linearly trivial there.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    canonicalIdeal R
 SeeAlso
   antiCanonicalSection
   antiCanonicalDivisorData
@@ -245,6 +335,13 @@ Description
     since $X$ is normal and $\pi$ is projective birational, Zariski's main
     theorem makes $\pi$ an isomorphism near any point with finite fibre, so
     components of the exceptional locus are exactly the contracted ones.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    isSmallProjection P
+  Text
+    Small: the exceptional locus of this resolution of the ordinary double
+    point is a single rational curve, of codimension two.
 Caveat
   By the same argument every relevant component already has codimension one, so
   the dimension test in the implementation cannot fail; it is kept as a safety
@@ -295,6 +392,13 @@ Description
     torus then acts freely on $\operatorname{Spec} A \setminus V(\mathrm{irr})$,
     which becomes a torsor over $Z$ and lets $S_2$ travel in both directions.
     That covers an affine base and a projective base with the standard grading.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    isS2Source P
+  Text
+    This is the weaker of the two conditions Lemma 6.6 asks for, and the one
+    the algorithm actually tests; normality implies it.
 Caveat
   On its own this does not say that $Z$ is normal: it has to be combined with
   @TO isSmallProjection@.
@@ -327,6 +431,11 @@ Description
     $D>\max_j(e_j/p_j)$ and return the Hilbert basis for the transformed
     positive weights $Dp_j-e_j$, together with the monograded coordinate ring
     and its degrees.  When every $e_j$ is zero this is the usual Segre diagonal.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    d = b2mDiagonalData P;
+    sort apply(keys d, toString)
 SeeAlso
   b2mToGraphMorphism
   segreHilbertBasis
@@ -352,6 +461,15 @@ Description
     bigraded variety.  For a skew fibre block with degrees $(p_j,e_j)$, the
     implementation chooses an integral slope $D>e_j/p_j$ and applies the same
     affine-semigroup construction to the positive weights $Dp_j-e_j$.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    G = b2mToGraphMorphism P
+    #(G#fiberVariables), #(G#baseVariables)
+  Text
+    The projection's two fibre variables and five base variables are replaced
+    by the ten Segre coordinates of the graph and the five coordinates of the
+    base.
 SeeAlso
   b2mDiagonalData
 ///
@@ -419,6 +537,12 @@ Description
     @TO baseVariables@ and @TO irrelevantIdeal@, with the same meanings as for a
     @TO B2MProjection@ except that @TO sourceRing@ now carries the monograded
     model $W$ of the source and the fiber variables are the Segre coordinates.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    G = b2mToGraphMorphism P
+    numgens G#ambientRing
+    dim G#sourceRing, dim G#baseCoordinateRing
 SeeAlso
   B2MProjection
   b2mToGraphMorphism
@@ -434,6 +558,10 @@ Description
     The ring $k[u_1,\dots,u_r,x_0,\dots,x_n]$, bigraded so that the relations of
     the Rees algebra are bihomogeneous.  Its quotient by @TO definingIdeal@ is
     @TO totalRing@.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#ambientRing
 SeeAlso
   B2MProjection
 ///
@@ -446,6 +574,10 @@ Headline
 Description
   Text
     The ideal of @TO ambientRing@ defining $Z$, homogeneous for both gradings.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#definingIdeal
 SeeAlso
   B2MProjection
 ///
@@ -460,6 +592,10 @@ Description
     The quotient of @TO ambientRing@ by @TO definingIdeal@, that is the affine
     cone over $Z$.  Note that its Krull dimension exceeds $\dim Z$ by the number
     of cone directions; @TO geometricDimension@ makes the correction.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#totalRing
 SeeAlso
   B2MProjection
   geometricDimension
@@ -474,6 +610,11 @@ Description
   Text
     The ring $W$ obtained from the source of a @TO B2MProjection@ by the Segre
     isomorphism of Proposition 2.6.  Present only on a @TO GraphMorphism@.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    G = b2mToGraphMorphism bigradedReesProjection ideal(x0,x2);
+    G#sourceRing
+    dim G#sourceRing
 SeeAlso
   GraphMorphism
   b2mToGraphMorphism
@@ -488,6 +629,10 @@ Description
   Text
     The ring $R$, so that the base is $\operatorname{Proj} R$ or, when
     @TO isProjectiveBase@ is false, $\operatorname{Spec} R$.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#baseCoordinateRing
 Caveat
   Not to be confused with {\tt baseRing}, which belongs to Macaulay2 itself.
   This key was called {\tt baseRing} before version 0.2.0 and was renamed
@@ -504,6 +649,10 @@ Headline
 Description
   Text
     The $u_1,\dots,u_r$, one for each generator of the ideal being blown up.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#fiberVariables
 SeeAlso
   B2MProjection
   baseVariables
@@ -518,6 +667,10 @@ Description
   Text
     The images in @TO ambientRing@ of the variables of the ambient ring of
     @TO baseCoordinateRing@.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#baseVariables
 SeeAlso
   B2MProjection
   fiberVariables
@@ -536,6 +689,10 @@ Description
     subvariety exactly when it does not contain this one, which is how
     @TO isSmallProjection@ and @TO isS2Source@ discard components that are not
     really there.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#irrelevantIdeal
 SeeAlso
   B2MProjection
 ///
@@ -551,6 +708,10 @@ Description
     $\operatorname{Proj} R[Jt] \to \operatorname{Proj} R$.  Its generators are
     what @TO isSmallProjection@ tests, and in the toric examples reading them off
     recovers the fan of $Z$.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#blownUpIdeal
 SeeAlso
   B2MProjection
   bigradedReesProjection
@@ -566,6 +727,10 @@ Description
     Records the {\tt UniformDegree} passed to @TO bigradedReesProjection@.  It is
     {\tt null} in the default, correct mode, in which the generators are left
     alone and the fiber variables are weighted instead.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#uniformDegreeUsed
 SeeAlso
   UniformDegree
   singleDegreeIdeal
@@ -611,6 +776,10 @@ Description
   Text
     Reports how the projection was built.  Projections made before this
     distinction existed are read as projective.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    isProjectiveBase bigradedReesProjection ideal(x0,x2)
+    isProjectiveBase bigradedReesProjection(ideal(x0,x2), BaseIsProjective => false)
 SeeAlso
   BaseIsProjective
 ///
@@ -636,6 +805,14 @@ Description
     variables and then mapping them to zero.  It defines the image in $X$ of the
     subvariety cut out by $q$, which is what @TO isSmallProjection@ compares
     dimensions against.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    P#blownUpIdeal
+    restrictToBase(P, P#blownUpIdeal)
+  Text
+    The blown-up ideal lives in the ambient $k[u,x]$ of the projection; taking
+    it back to the base recovers the ideal of $R$ that was blown up.
 SeeAlso
   B2MProjection
   isSmallProjection
@@ -696,6 +873,12 @@ Description
     least degree among the generators of that product.  When every $n_i$ is
     negative -- which happens routinely in the toric examples -- the product is
     the unit ideal and $s = 1$.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    antiCanonicalSection R
+  Text
+    On the ordinary double point $K_X$ is already linearly trivial, so the
+    section is the constant $1$.
 Caveat
   This is the paper's construction and it is kept for that reason, but it is not
   what @TO antiCanonicalDivisorData@ does by default.  The $s$ produced here
@@ -737,6 +920,14 @@ Description
     @TO computeRelativeCanonicalModel@
     returns it.  The contraction is a flop in that case, so there is no flip,
     but the relative canonical model exists all the same.
+  Example
+    R = QQ[u1,u2,u3,u4,u5]/minors(2, matrix{{u1,u2,u4},{u3,u4,u5}});
+    (s, Edata) = antiCanonicalDivisorData(R, BaseIsProjective => false);
+    #Edata
+  Text
+    Two components, so $-K_X$ is not linearly trivial and the divisorial
+    ideals of Step 5 are the ones to compute.  On the ordinary double point
+    the list is empty instead.
 Caveat
   An error is raised when $E$ turns out not to be effective, which can only
   happen on the {\tt AntiCanonicalSection} route.
@@ -770,6 +961,11 @@ Description
     products of ordinary powers and a reflexive hull instead, which on the same
     example takes about 0.006 seconds and is essentially flat in $m$.  The two
     agree.
+  Example
+    R = QQ[u1,u2,u3,u4,u5]/minors(2, matrix{{u1,u2,u4},{u3,u4,u5}});
+    (s, Edata) = antiCanonicalDivisorData(R, BaseIsProjective => false);
+    divisorialIdeal(Edata, 1)
+    divisorialIdeal(Edata, 2)
 SeeAlso
   antiCanonicalDivisorData
 ///
@@ -793,6 +989,15 @@ Description
     the degree $(1,-d_0)$ and eliminating it.  The grading is the one described
     at @TO bigradedReesProjection@; over an affine base the $u$-degree alone is
     used and is left implicit, since none of the operations involved needs it.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    (A, IZ) = bigradedReesIdeal ideal(x0,x2);
+    numgens A
+    IZ
+  Text
+    Two fibre variables $u_1,u_2$ are added to the five coordinates of the
+    ambient of $R$, and the Rees algebra is cut out by the equation of $R$
+    together with the two relations of the blown-up ideal.
 SeeAlso
   bigradedReesProjection
 ///
@@ -817,6 +1022,10 @@ Description
     {\tt minors(codim I, jacobian)}, which explodes.  On one nine-variable
     example the $S_2$ half took 0.02 seconds and the $R_1$ half 119, with the
     minors having 1,436,495 generators.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    P = bigradedReesProjection ideal(x0,x2);
+    isNormalSource P
 Caveat
   @TO computeRelativeCanonicalModel@ does not use this.  Once the projection is
   known to be small,
@@ -883,6 +1092,14 @@ Description
     One variable for each element of @TO segreHilbertBasis@, graded by the degree
     of the monomial it stands for.  @TO b2mToGraphMorphism@ maps it onto the
     Segre product and takes the kernel.
+  Example
+    (T, HB, zdegs) = segreProductRing(QQ, {1,1}, {1,1});
+    numgens T, zdegs
+  Text
+    Weighting one factor adds a generator and the degrees stop being constant.
+  Example
+    (T, HB, zdegs) = segreProductRing(QQ, {1,1}, {1,2});
+    numgens T, zdegs
 SeeAlso
   segreHilbertBasis
 ///
@@ -902,6 +1119,10 @@ Outputs
 Description
   Text
     The same thing as {\tt G#definingIdeal}.
+  Example
+    R = QQ[x0,x1,x2,x3,x4]/ideal(x0*x1-x2*x3);
+    G = b2mToGraphMorphism bigradedReesProjection ideal(x0,x2);
+    numgens graphMorphismIdeal G
 Caveat
   Called {\tt graphIdeal} before version 0.2.0, which hid Macaulay2's own
   {\tt graphIdeal} for ring maps.
@@ -929,6 +1150,13 @@ Description
     whether the generators share a degree in the first place: they do exactly
     when {\tt degrees J} is constant, and only then does the paper's grading
     $\deg u_i = (1,0)$ apply.
+  Example
+    R = QQ[x,y,z];
+    degrees ideal(x,y), uniformDegree ideal(x,y)
+    degrees ideal(x,y*z), uniformDegree ideal(x,y*z)
+  Text
+    The generators share a degree exactly when {\tt degrees} is constant, and
+    only then does the paper's grading $\deg u_i = (1,0)$ apply.
 SeeAlso
   UniformDegree
   singleDegreeIdeal
